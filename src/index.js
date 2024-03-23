@@ -18,5 +18,5 @@ app.use(`/${ARTICLE_API_ENDPOINT}`, articleRouter);
 
 
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
+    console.log(`Server running at port: ${PORT}`);
+});
