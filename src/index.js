@@ -11,7 +11,7 @@ const CORS_OPTIONS = {
   methods: "GET,POST,PUT,DELETE"
 };
 
-app.use(cors());
+app.use(cors(CORS_OPTIONS));
 
 
 app.use(`/${ARTICLE_API_ENDPOINT}`, articleRouter);
