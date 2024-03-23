@@ -2,9 +2,8 @@ import { S3Client } from "@aws-sdk/client-s3";
 import AWS from "aws-sdk";
 import 'dotenv/config';
 
-export class AwsS3Conn {
+export default class AwsS3Conn {
     #awsAcConfig;
-    #awsBucketName;
     #awsBucketRegion;
     #s3Client;
 
@@ -49,14 +48,12 @@ export class AwsS3Conn {
     }
 
     #loadEnvBucketConfig() {
-        const BUCKET_NAME_ENV_KEY = "AWS_BUCKET_NAME";
         const BUCKET_REGION_ENV_KEY = "AWS_BUCKET_REGION";
 
-        if (!process.env[BUCKET_NAME_ENV_KEY] || !process.env[BUCKET_REGION_ENV_KEY]) {
+        if (!process.env[BUCKET_REGION_ENV_KEY]) {
             throw new Error("Missing AWS bucket environment variables");
         }
 
-        this.#awsBucketName = process.env[BUCKET_NAME_ENV_KEY];
         this.#awsBucketRegion = process.env[BUCKET_REGION_ENV_KEY];
 
     }
