@@ -2,7 +2,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import AWS from "aws-sdk";
 import 'dotenv/config';
 
-export class AwsBucket {
+export class AwsS3Conn {
     #awsAcConfig;
     #awsBucketName;
     #awsBucketRegion;
@@ -10,7 +10,9 @@ export class AwsBucket {
 
     constructor() {
         this.#envLoadAwsAcConfig();
+        this.#loadEnvBucketConfig();
         this.#initS3Client();
+        return this.#s3Client;
     }
 
     #envLoadAwsAcConfig() {
