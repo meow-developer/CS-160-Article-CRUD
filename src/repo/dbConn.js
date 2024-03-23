@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import 'dotenv/config'
-import { DbExceptions } from './exception/dbException';
+import { DbExceptions } from './exception/dbConnException';
 
 /**
  * MySQL database class to manage database connections
