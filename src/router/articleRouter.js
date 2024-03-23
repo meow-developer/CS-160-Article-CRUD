@@ -6,7 +6,7 @@ const router = Router();
 router.get(`/`, articleController.listArticle);
 router.get(`/:id`, articleController.getArticle);
 router.post(`/`, articleController.createArticle);
-router.patch(`/:id`, articleController.updateArticle);
+router.put(`/:id`, articleController.updateArticle);
 router.delete(`/:id`, articleController.deleteArticle);
 
 export default router;

@@ -37,7 +37,7 @@ const getArticle = (req, res) => {
 
 /**
  * Updating an article
- * HTTP Method: PATCH
+ * HTTP Method: PUT
  * Path: /article/:articleId
  */
 const updateArticle = (req, res) => {
