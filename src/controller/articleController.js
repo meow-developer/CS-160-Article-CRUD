@@ -23,9 +23,7 @@ const createArticle = (req, res) => {
  * @returns {void}
  */
 const listArticle = (req, res) => {
-
     const query = req.query;
-
     // Default limit for the number of articles to fetch
     const DEFAULT_ARTICLE_COUNT_LIMIT = 10;
     /** 
@@ -48,6 +46,7 @@ const listArticle = (req, res) => {
  * @returns {void}
  */
 const getArticle = (req, res) => {
+    // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
 
@@ -63,6 +62,7 @@ const getArticle = (req, res) => {
  * @returns {void}
  */
 const updateArticle = (req, res) => {
+    // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
 };
