@@ -24,6 +24,7 @@ export class MysqlDatabase {
 
     /**
      * Singleton class to manage MySQL database connections
+     * @constructor
      * @returns {MysqlDatabase}
      */
     constructor() {
@@ -40,6 +41,7 @@ export class MysqlDatabase {
     
     /**
      * Create a new database connection pool
+     * @async
      * @returns {Promise<Pool>} A new database connection pool
      * @example
      * const mysqlDatabase = new MysqlDatabase();
@@ -56,7 +58,11 @@ export class MysqlDatabase {
             password: this.#mysqlPassword,
             database: this.#mysqlDb,
             waitForConnections: true,
-            connectionLimit: 8,
+            /**
+             * Set the available connection limit to 6
+             * Each connection should be reserved by an database operation for Article CRUD
+             */
+            connectionLimit: 6,
             queueLimit: 0
         });
         return this.#dbPool;
@@ -64,6 +70,7 @@ export class MysqlDatabase {
 
     /**
      * Test the database connection
+     * @async
      * @returns {Promise<boolean>} True if the database connection is available, false otherwise
      */
     async testPoolConnection() {
