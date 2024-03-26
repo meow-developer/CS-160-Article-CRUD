@@ -13,7 +13,7 @@ import { DbExceptions } from './exception/dbConnException';
  * console.log(rows);
  * connection.release(); //Release the connection back to the pool
  */
-export class MysqlDatabase {
+export default class MysqlDatabase {
     static instance;
 
     #mysqlHost;
