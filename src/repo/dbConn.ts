@@ -6,7 +6,7 @@ import DbConnError from './exception/dbConnException.js';
  * MySQL database class to manage database connections
  * @class
  * @example
- * const mysqlDatabase = new MysqlDatabase();
+ * const mysqlDatabase = MysqlDatabase.getInstance();
  * const pool = await mysqlDatabase.createPool();
  * const connection = await pool.getConnection();
  * const [rows] = await connection.query('SELECT 1');
@@ -47,7 +47,7 @@ export default class MysqlDatabase {
      * @async
      * @returns {Promise<Pool>} A new database connection pool
      * @example
-     * const mysqlDatabase = new MysqlDatabase();
+     * const mysqlDatabase = MysqlDatabase.getInstance();
      * const pool = await mysqlDatabase.createPool();
      * const connection = await pool.getConnection();
      * const [rows] = await connection.query('SELECT 1');
