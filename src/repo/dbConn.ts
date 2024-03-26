@@ -44,8 +44,7 @@ export default class MysqlDatabase {
     
     /**
      * Create a new database connection pool
-     * @async
-     * @returns {Promise<Pool>} A new database connection pool
+     * @returns {mysql.Pool} A new database connection pool
      * @example
      * const mysqlDatabase = MysqlDatabase.getInstance();
      * const pool = await mysqlDatabase.createPool();
@@ -54,8 +53,8 @@ export default class MysqlDatabase {
      * console.log(rows);
      * connection.release(); //Release the connection back to the pool
      */
-    public async createPool(): Promise<mysql.Pool> {
-        this.dbPool = await mysql.createPool({
+    public createPool(): mysql.Pool {
+        this.dbPool = mysql.createPool({
             host: this.mysqlHost,
             user: this.mysqlUser,
             password: this.mysqlPassword,
