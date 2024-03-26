@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import 'dotenv/config'
-import { DbExceptions } from './exception/dbConnException';
+import { DbException } from './exception/dbConnException.js';
 
 /**
  * MySQL database class to manage database connections
@@ -14,29 +14,32 @@ import { DbExceptions } from './exception/dbConnException';
  * connection.release(); //Release the connection back to the pool
  */
 export default class MysqlDatabase {
-    static instance;
+    private static instance: MysqlDatabase;
 
-    #mysqlHost;
-    #mysqlDb;
-    #mysqlUser;
-    #mysqlPassword;
-    #dbPool;
+    private mysqlHost: string = '';
+    private mysqlDb: string = '';
+    private mysqlUser: string = '';
+    private mysqlPassword: string = '';
+    private dbPool: mysql.Pool | null = null;
 
     /**
      * Singleton class to manage MySQL database connections
      * @constructor
      * @returns {MysqlDatabase}
      */
-    constructor() {
-        if (MysqlDatabase.instance) {
-            return MysqlDatabase.instance;
+    private constructor() {
+        this.loadEnvDatabaseConfig();
+    }
+
+    /**
+     * Get the singleton instance of the MysqlDatabase class
+     * @returns {MysqlDatabase} The singleton instance of the MysqlDatabase class
+     */
+    public static getInstance(): MysqlDatabase {
+        if (!MysqlDatabase.instance) {
+            MysqlDatabase.instance = new MysqlDatabase();
         }
-
-        MysqlDatabase.instance = this;
-
-        this.#loadEnvDatabaseConfig();
-
-        return this;
+        return MysqlDatabase.instance;
     }
     
     /**
@@ -51,12 +54,12 @@ export default class MysqlDatabase {
      * console.log(rows);
      * connection.release(); //Release the connection back to the pool
      */
-    async createPool() {
-        this.#dbPool = await mysql.createPool({
-            host: this.#mysqlHost,
-            user: this.#mysqlUser,
-            password: this.#mysqlPassword,
-            database: this.#mysqlDb,
+    public async createPool(): Promise<mysql.Pool> {
+        this.dbPool = await mysql.createPool({
+            host: this.mysqlHost,
+            user: this.mysqlUser,
+            password: this.mysqlPassword,
+            database: this.mysqlDb,
             waitForConnections: true,
             /**
              * Set the available connection limit to 6
@@ -65,7 +68,7 @@ export default class MysqlDatabase {
             connectionLimit: 6,
             queueLimit: 0
         });
-        return this.#dbPool;
+        return this.dbPool;
     }
 
     /**
@@ -73,20 +76,20 @@ export default class MysqlDatabase {
      * @async
      * @returns {Promise<boolean>} True if the database connection is available, false otherwise
      */
-    async testPoolConnection() {
+    async testPoolConnection(): Promise<boolean> {
+
+        if (!this.dbPool) {
+            throw new DbException('Database connection pool is not initialized');
+        }
+
         try {
-            const connection = await this.#dbPool.getConnection();
-            const isDbReturnPing = await connection.ping();
+            const connection = await this.dbPool.getConnection();
+            await connection.ping();
 
             connection.release();
 
-            if (isDbReturnPing) {
-                console.log('Database connection is available');
-                return true;
-            } else {
-                console.log('Database connection is not available. Ping failed.');
-                return false;
-            }
+            console.log('Database connection is available');
+            return true;
 
         } catch (error) {
             console.error('Error occurred while testing database connection\n', error);
@@ -98,7 +101,7 @@ export default class MysqlDatabase {
      * @private
      * @throws {DbExceptions} If any of the required environment variables are missing
      */
-    #loadEnvDatabaseConfig() {
+    private loadEnvDatabaseConfig(): void {
         const MYSQL_HOST_ENV_KEY = 'MYSQL_HOST';
         const MYSQL_DB_ENV_KEY = 'MYSQL_DB';
         const MYSQL_USER_ENV_KEY = 'MYSQL_USER';
@@ -106,13 +109,13 @@ export default class MysqlDatabase {
 
         if (!process.env[MYSQL_HOST_ENV_KEY] || !process.env[MYSQL_USER_ENV_KEY] || 
             !process.env[MYSQL_PASSWORD_ENV_KEY] || !process.env[MYSQL_DB_ENV_KEY]) {
-            throw new DbExceptions('Missing database environment variables');
+            throw new DbException('Missing database environment variables');
         }
 
-        this.#mysqlHost = process.env[MYSQL_HOST_ENV_KEY];
-        this.#mysqlDb = process.env[MYSQL_DB_ENV_KEY];
-        this.#mysqlUser = process.env[MYSQL_USER_ENV_KEY];
-        this.#mysqlPassword = process.env[MYSQL_PASSWORD_ENV_KEY];
+        this.mysqlHost = process.env[MYSQL_HOST_ENV_KEY];
+        this.mysqlDb = process.env[MYSQL_DB_ENV_KEY];
+        this.mysqlUser = process.env[MYSQL_USER_ENV_KEY];
+        this.mysqlPassword = process.env[MYSQL_PASSWORD_ENV_KEY];
     }
     
 }
