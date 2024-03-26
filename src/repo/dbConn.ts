@@ -76,7 +76,7 @@ export default class MysqlDatabase {
      * @async
      * @returns {Promise<boolean>} True if the database connection is available, false otherwise
      */
-    async testPoolConnection(): Promise<boolean> {
+    public async testPoolConnection(): Promise<boolean> {
 
         if (!this.dbPool) {
             throw new DbException('Database connection pool is not initialized');
