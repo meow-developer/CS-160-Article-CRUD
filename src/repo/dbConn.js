@@ -75,7 +75,7 @@ export default class MysqlDatabase {
      */
     async testPoolConnection() {
         try {
-            const connection = await pool.getConnection();
+            const connection = await this.#dbPool.getConnection();
             const isDbReturnPing = await connection.ping();
 
             connection.release();
