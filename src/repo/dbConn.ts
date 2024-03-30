@@ -1,6 +1,6 @@
 import mysql from 'mysql2/promise';
 import 'dotenv/config'
-import DbConnError from './exception/dbConnException.js';
+import { DbConnException } from './exception/dbConnException.js';
 
 /**
  * MySQL database class to manage database connections
@@ -65,7 +65,10 @@ export default class MysqlDatabase {
              * Each connection should be reserved by an database operation for Article CRUD
              */
             connectionLimit: 6,
-            queueLimit: 0
+            queueLimit: 0,
+            ssl: {
+                rejectUnauthorized: false
+            }
         });
         return this.dbPool;
     }
@@ -78,7 +81,7 @@ export default class MysqlDatabase {
     public async testPoolConnection(): Promise<boolean> {
 
         if (!this.dbPool) {
-            throw new DbConnError('Database connection pool is not initialized');
+            throw new DbConnException('Database connection pool is not initialized');
         }
 
         try {
@@ -108,7 +111,7 @@ export default class MysqlDatabase {
 
         if (!process.env[MYSQL_HOST_ENV_KEY] || !process.env[MYSQL_USER_ENV_KEY] || 
             !process.env[MYSQL_PASSWORD_ENV_KEY] || !process.env[MYSQL_DB_ENV_KEY]) {
-            throw new DbConnError('Missing database environment variables');
+            throw new DbConnException('Missing database environment variables');
         }
 
         this.mysqlHost = process.env[MYSQL_HOST_ENV_KEY];
