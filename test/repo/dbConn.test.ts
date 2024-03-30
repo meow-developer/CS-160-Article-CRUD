@@ -1,13 +1,12 @@
-import {expect, test} from '@jest/globals';
 import MysqlDatabase from '../../src/repo/dbConn';
 
-
-test("", async ()=>{
+describe("MySQL Database connection", ()=>{
     const db = MysqlDatabase.getInstance();
-    const pool = db.createPool();
-    const conn = await pool.getConnection();
+    db.createPool();
 
-    const ping = await conn.ping();
+    test("Ping Test", async ()=>{
+        const ping = await db.testPoolConnection();
 
-    expect(ping).toBe(true);
+        expect(ping).toBe(true);
+    });
 });
