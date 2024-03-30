@@ -7,10 +7,9 @@ import { DbConnException } from './exception/dbConnException.js';
  * @class
  * @example
  * const mysqlDatabase = MysqlDatabase.getInstance();
- * const pool = await mysqlDatabase.createPool();
+ * const pool = mysqlDatabase.getPool();
  * const connection = await pool.getConnection();
  * const [rows] = await connection.query('SELECT 1');
- * console.log(rows);
  * connection.release(); //Release the connection back to the pool
  */
 export default class MysqlDatabase {
@@ -20,7 +19,7 @@ export default class MysqlDatabase {
     private mysqlDb: string = '';
     private mysqlUser: string = '';
     private mysqlPassword: string = '';
-    private dbPool: mysql.Pool | null = null;
+    private dbPool: mysql.Pool;
 
     /**
      * Singleton class to manage MySQL database connections
@@ -29,6 +28,7 @@ export default class MysqlDatabase {
      */
     private constructor() {
         this.loadEnvDatabaseConfig();
+        this.dbPool = this.createPool();
     }
 
     /**
@@ -45,16 +45,9 @@ export default class MysqlDatabase {
     /**
      * Create a new database connection pool
      * @returns {mysql.Pool} A new database connection pool
-     * @example
-     * const mysqlDatabase = MysqlDatabase.getInstance();
-     * const pool = await mysqlDatabase.createPool();
-     * const connection = await pool.getConnection();
-     * const [rows] = await connection.query('SELECT 1');
-     * console.log(rows);
-     * connection.release(); //Release the connection back to the pool
      */
-    public createPool(): mysql.Pool {
-        this.dbPool = mysql.createPool({
+    private createPool(): mysql.Pool {
+        const pool = mysql.createPool({
             host: this.mysqlHost,
             user: this.mysqlUser,
             password: this.mysqlPassword,
@@ -70,7 +63,7 @@ export default class MysqlDatabase {
                 rejectUnauthorized: false
             }
         });
-        return this.dbPool;
+        return pool;
     }
 
     /**
@@ -79,11 +72,6 @@ export default class MysqlDatabase {
      * @returns {Promise<boolean>} True if the database connection is available, false otherwise
      */
     public async testPoolConnection(): Promise<boolean> {
-
-        if (!this.dbPool) {
-            throw new DbConnException('Database connection pool is not initialized');
-        }
-
         try {
             const connection = await this.dbPool.getConnection();
             await connection.ping();
@@ -119,5 +107,7 @@ export default class MysqlDatabase {
         this.mysqlUser = process.env[MYSQL_USER_ENV_KEY];
         this.mysqlPassword = process.env[MYSQL_PASSWORD_ENV_KEY];
     }
-    
+    public getPool(): mysql.Pool {
+        return this.dbPool;
+    }
 }
