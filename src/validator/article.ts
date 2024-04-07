@@ -7,7 +7,7 @@ import { PathLike } from 'fs';
 import { readPdfText } from 'pdf-text-reader';
 
 
-class ArticleFileValidateFailError extends Error {
+export class ArticleFileValidateFailError extends Error {
     constructor(message: string) {
         super(message);
     }
@@ -19,22 +19,15 @@ export class ArticleFileValidator {
 
     }
 
-    private generateUUIDFileName(): string {
-        return crypto.randomUUID();
-    }
+    private checkFileExtension(file: Express.Multer.File) {
+        const allowedExtensions = ["pdf"];
 
-    private async saveArticleFileToDisk(file: Express.Multer.File) {
-        const FOLDER_PATH = "./uploads_temp";
-        const filePath = FOLDER_PATH + this.generateUUIDFileName();
-
-        try {
-            await fs.writeFile(filePath, file.buffer);
-            return filePath;
-        } catch (err) {
-            console.error(err);
-            throw new Error("Error saving file to disk");
+        if (!allowedExtensions.includes(file.mimetype)) {
+            throw new ArticleFileValidateFailError("Invalid file extension");
         }
+
     }
+
 
     private async getArticlePdfText(filePath: PathLike): Promise<string> {
         try {
@@ -45,23 +38,6 @@ export class ArticleFileValidator {
         }
     }
 
-    private async deleteArticleFileFromDisk(filePath: PathLike): Promise<void> {
-        try {
-            await fs.unlink(filePath);
-        } catch (err) {
-            console.error(err);
-            throw new Error("Error deleting file from disk");
-        }
-    }
-
-    private checkFileExtension(file: Express.Multer.File) {
-        const allowedExtensions = ["pdf"];
-
-        if (!allowedExtensions.includes(file.mimetype)) {
-            throw new ArticleFileValidateFailError("Invalid file extension");
-        }
-
-    }
 
     private checkFileToken(articleText: string): void {
         const textTokenCounterService = new TextTokenCounterService(articleText);
@@ -74,28 +50,17 @@ export class ArticleFileValidator {
     }
 
     public fileFilter(req: Request, file: Express.Multer.File, cb: FileFilterCallback): void {
-        let filePath: PathLike = "";
-
-        this.saveArticleFileToDisk(file)
-            .then(path => {
-                filePath = path;
-                return this.getArticlePdfText(filePath);
-            })
-            .then(articlePdfText => {
-                this.checkFileExtension(file);
-                this.checkFileToken(articlePdfText);
-                cb(null, true);
-            })
-            .catch(err => {
-                if (err instanceof ArticleFileValidateFailError) {
-                    cb(err);
-                } else {
-                    cb(new Error("Internal server error"));
-                }
-            })
-            .finally(() => {
-                this.deleteArticleFileFromDisk(filePath)
-                    .catch(err => console.error(err));
-            });
+        
+        this.checkFileExtension(file);
+        this.getArticlePdfText(file.path).then((articleText) => {
+            this.checkFileToken(articleText);
+            cb(null, true);
+        }).catch((err) => {
+            if (err instanceof ArticleFileValidateFailError) {
+                cb(err);
+            } else {
+                cb(new Error("Internal server error handling pdf file upload"));
+            }
+        });
     }
 }

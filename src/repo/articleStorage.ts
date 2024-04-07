@@ -5,13 +5,21 @@ import { S3Client, GetObjectCommand, DeleteObjectCommand, PutObjectCommand, S3Se
 import { PathLike } from 'node:fs';
 
 export default class ArticleStorage {
+    public static instance: ArticleStorage;
     private bucketName: string = "";
     private s3Client: S3Client;
 
-    constructor() {
+    private constructor() {
         this.loadEnvBucketName();
         const awsS3Conn = AwsS3Conn.getInstance();
         this.s3Client = awsS3Conn.getS3Client();
+    }
+
+    public static getInstance(): ArticleStorage {
+        if (!this.instance) {
+            this.instance = new ArticleStorage();
+        }
+        return this.instance;
     }
 
     private async sendCommand(command: GetObjectCommand | DeleteObjectCommand | PutObjectCommand): Promise<void> {
@@ -35,7 +43,7 @@ export default class ArticleStorage {
     }
 
     public async saveArticle(
-        articleId: string,
+        articleUUID: string,
         articleFilePath: PathLike
     ) {
 
@@ -44,7 +52,7 @@ export default class ArticleStorage {
          */
         const command = new PutObjectCommand({
             Bucket: this.bucketName,
-            Key: articleId,
+            Key: articleUUID,
             Body: await this.articleFileToStream(articleFilePath)
         });
 
@@ -52,25 +60,25 @@ export default class ArticleStorage {
 
     }
 
-    public async deleteArticle(articleId: string) {
+    public async deleteArticle(articleUUID: string) {
         /**
          * @see {@link https://docs.aws.amazon.com/AmazonS3/latest/userguide/example_s3_DeleteObject_section.html}
          */
         const command = new DeleteObjectCommand({
             Bucket: this.bucketName,
-            Key: articleId,
+            Key: articleUUID,
         });
 
         await this.sendCommand(command);
     }
 
-    public async getArticle(articleId: string) {
+    public async getArticle(articleUUID: string) {
         /**
          * @see {@link https://docs.aws.amazon.com/AmazonS3/latest/userguide/example_s3_GetObject_section.html}
          */
         const command = new GetObjectCommand({
             Bucket: this.bucketName,
-            Key: articleId,
+            Key: articleUUID,
         });
 
         await this.sendCommand(command);

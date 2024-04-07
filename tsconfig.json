@@ -12,8 +12,8 @@
       "allowJs": true
     },
     "include": [
-      "src/**/*.ts"                          // Include all TypeScript files in src and sub-directories
-, "src/controller/articleController.js"    ],
+      "src/**/*.ts"                          // Include all TypeScript files in src and sub-directories  
+    ],
     "exclude": [
       "node_modules",                        // Exclude the node_modules directory
       "**/*.spec.ts"                         // Exclude test files

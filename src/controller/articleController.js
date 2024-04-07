@@ -1,4 +1,7 @@
 import { Request, Response } from 'express';
+import ArticleCreateService from '../service/articleCreate.js';
+import { pdfUpload } from '../middleware/pdfUpload.js';
+import { ArticleFileValidateFailError } from '../validator/article.js';
 
 /**
  * Creating a new article
@@ -10,7 +13,27 @@ import { Request, Response } from 'express';
  * @returns {void}
  */
 const createArticle = (req, res) => {
-    
+    pdfUpload(req, res, (err) => {
+
+        if (err) {
+            if (err instanceof ArticleFileValidateFailError) {
+                res.status(400).send(err.message);
+                return;
+            } else {
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+        }
+
+        const articleFile = req.file;
+        const articleCreateService = new ArticleCreateService();
+        
+        articleCreateService.save(articleFile).then(()=>{
+            res.status(201).send('Article created successfully');
+        }).catch((err)=>{
+            res.status(500).send('Internal Server Error');
+        });
+    })
 };
 
 /**
