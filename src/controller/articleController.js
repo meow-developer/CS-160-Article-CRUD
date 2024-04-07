@@ -10,7 +10,7 @@ import { Request, Response } from 'express';
  * @returns {void}
  */
 const createArticle = (req, res) => {
-
+    
 };
 
 /**
