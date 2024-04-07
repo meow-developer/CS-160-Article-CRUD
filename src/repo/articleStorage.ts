@@ -22,9 +22,9 @@ export default class ArticleStorage {
         return this.instance;
     }
 
-    private async sendCommand(command: GetObjectCommand | DeleteObjectCommand | PutObjectCommand): Promise<void> {
+    private async sendCommand(command: GetObjectCommand | DeleteObjectCommand | PutObjectCommand): Promise<any> {
         try {
-            await this.s3Client.send(command);
+            return await this.s3Client.send(command);
             
         } catch (err) {
             if (err instanceof S3ServiceException) {
@@ -81,7 +81,9 @@ export default class ArticleStorage {
             Key: articleUUID,
         });
 
-        await this.sendCommand(command);
+        const response = await this.sendCommand(command);
+        const responseStr = await response.Body?.transformToString();
+        return responseStr;
 
     }
 
