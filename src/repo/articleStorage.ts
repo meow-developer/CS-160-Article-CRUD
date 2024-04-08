@@ -74,9 +74,9 @@ export default class ArticleStorage {
     }
 
     private loadEnvBucketName() {
-        const bucketName_ENV_KEY = "AWS_bucketName";
+        const ARTICLE_BUCKET_NAME_ENV_KEY = "AWS_ARTICLE_BUCKET_NAME";
 
-        const envBucketName = process.env[bucketName_ENV_KEY];
+        const envBucketName = process.env[ARTICLE_BUCKET_NAME_ENV_KEY];
 
         if (!envBucketName) {
             throw new Error("Missing AWS bucket name in environment variables");
