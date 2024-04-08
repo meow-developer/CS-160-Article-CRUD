@@ -2,12 +2,7 @@ import crypto, { UUID } from 'crypto';
 import ArticleDb from '../repo/articleDb.js';
 import { Article } from '../repo/article.js';
 import ArticleStorage from  '../repo/articleStorage.js';
-
-class ArticleCreateError extends Error {
-    constructor(message: string){
-        super(message);
-    }
-}
+import { ServiceRestError } from './ServiceRestError.js';
 
 export default class ArticleCreateService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
@@ -38,7 +33,7 @@ export default class ArticleCreateService {
             tries++;
         } while (tries < MAX_TRIES);
 
-        throw new ArticleCreateError("Failed to generate UUID");
+        throw new ServiceRestError("Failed to generate UUID");
     }
 
     private async writeArticleToDb(

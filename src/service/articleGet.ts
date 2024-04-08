@@ -3,15 +3,7 @@ import { Article } from '../repo/article.js';
 import ArticleStorage from '../repo/articleStorage.js';
 import { open, unlink } from 'fs/promises';
 import { PathLike } from 'fs';
-
-export class ArticleGetError extends Error {
-    statusCode: number;
-    constructor(message: string, statusCode: number) {
-        super(message);
-        this.statusCode = statusCode;
-    }
-}
-
+import { ServiceRestError } from './ServiceRestError.js';
 
 export default class ArticleGetService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
@@ -29,7 +21,7 @@ export default class ArticleGetService {
         const isArticleExist = articleCount > 0;
 
         if (!isArticleExist) {
-            throw new ArticleGetError("Article not found", 404);
+            throw new ServiceRestError("Article not found", 404);
         }
     }
 

@@ -1,17 +1,10 @@
 import { Article } from '../repo/article.js';
 import ArticleDb from '../repo/articleDb.js';
 import ArticleStorage from '../repo/articleStorage.js';
-
-export class ArticleDeleteError extends Error {
-    statusCode: number;
-    constructor(message: string, statusCode: number) {
-        super(message);
-        this.statusCode = statusCode;
-    }
-}
+import { ServiceRestError } from './ServiceRestError.js';
 
 
-class ArticleDeleteService {
+export default class ArticleDeleteService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
     private articleId: Article["ArticleID"];
@@ -26,7 +19,7 @@ class ArticleDeleteService {
         const isArticleExist = articleCount > 0;
 
         if (!isArticleExist) {
-            throw new ArticleDeleteError("Article not found", 404);
+            throw new ServiceRestError("Article not found", 404);
         }
     }
 
@@ -44,16 +37,9 @@ class ArticleDeleteService {
         await this.articleStorage.deleteArticle(this.article?.StorageArticleUUID!);
     }
     public async delete() {
-        try {
-            await this.checkArticleExist();
-            await this.loadArticleFromDb();
-            await this.deactivateArticleInDb();
-            await this.deleteArticleInStorage();
-        } catch (error) {
-            if (error instanceof ArticleDeleteError) {
-                throw error;
-            }
-            throw new ArticleDeleteError("Internal Server Error", 500);
-        }
+        await this.checkArticleExist();
+        await this.loadArticleFromDb();
+        await this.deactivateArticleInDb();
+        await this.deleteArticleInStorage();
     }
 }

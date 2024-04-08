@@ -1,5 +1,8 @@
 import ArticleCreateService from '../service/articleCreate.js';
 import ArticleGetService, { ArticleGetError } from '../service/articleGet.js';
+import ArticleDeleteService, { ArticleDeleteError } from '../service/articleDelete.js';
+
+
 import { pdfUpload } from '../middleware/pdfUpload.js';
 import { ArticleFileValidateFailError } from '../validator/article.js';
 
@@ -119,6 +122,8 @@ const updateArticle = (req, res) => {
 const deleteArticle = (req, res) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
+
+
 
 
 };
