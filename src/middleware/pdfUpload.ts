@@ -1,4 +1,4 @@
-import { ArticleFileValidator } from '../validator/article.js';
+import { ArticleFileValidator } from '../validator/articleFile.js';
 import multer from 'multer'
 
 export const pdfUpload = multer({ 

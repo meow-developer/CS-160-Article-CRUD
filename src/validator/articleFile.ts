@@ -1,8 +1,6 @@
 import { FileFilterCallback } from 'multer';
 import { Request } from 'express';
 import TextTokenCounterService from '../service/countTextToken.js';
-import fs from 'fs/promises'
-import crypto from 'crypto';
 import { PathLike } from 'fs';
 import { readPdfText } from 'pdf-text-reader';
 
@@ -15,9 +13,6 @@ export class ArticleFileValidateFailError extends Error {
 
 export class ArticleFileValidator {
     private ARTICLE_TOKEN_LIMIT = 3500;
-    constructor() {
-
-    }
 
     private checkFileExtension(file: Express.Multer.File) {
         const allowedExtensions = ["application/pdf"];

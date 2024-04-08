@@ -4,7 +4,7 @@ import ArticleDeleteService, { ArticleDeleteError } from '../service/articleDele
 
 
 import { pdfUpload } from '../middleware/pdfUpload.js';
-import { ArticleFileValidateFailError } from '../validator/article.js';
+import { ArticleFileValidateFailError } from '../validator/articleFile.js';
 
 /**
  * Creating a new article
