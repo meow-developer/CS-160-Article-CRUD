@@ -30,7 +30,7 @@ describe('Article Database', () => {
     });
 
     test("Count Article By Storage UUID", async () => {
-        const STORAGE_UUID = "1";
+        const STORAGE_UUID = crypto.randomUUID();
         const articleCount = await articleDb.countArticleByStorageUUID(STORAGE_UUID);
     
         expect(articleCount).toBe(0);

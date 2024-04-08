@@ -4,5 +4,5 @@ export type Article = {
     Title: string,
     StorageArticleUUID: UUID,
     Active: boolean,
-    ArticleID?: string
+    ArticleID?: number
 }

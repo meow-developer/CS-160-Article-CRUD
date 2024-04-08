@@ -17,7 +17,7 @@
     ],
     "exclude": [
       "node_modules",                        // Exclude the node_modules directory
-      "**/*.spec.ts"                         // Exclude test files
+      "test",                         // Exclude the test directory
     ]
   }
   

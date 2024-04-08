@@ -20,9 +20,9 @@ export default class ArticleGetService {
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
     private articleStorageUUID: UUID | undefined;
     private articlePath: PathLike | undefined;
-    private articleId: string;
+    private articleId: number;
 
-    constructor(articleId: string){
+    constructor(articleId: number){
         this.articleId = articleId;
     }
     

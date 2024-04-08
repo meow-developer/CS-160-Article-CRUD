@@ -14,7 +14,7 @@ export class ArticleFileValidateFailError extends Error {
 }
 
 export class ArticleFileValidator {
-    ARTICLE_TOKEN_LIMIT = 3500;
+    private ARTICLE_TOKEN_LIMIT = 3500;
     constructor() {
 
     }
