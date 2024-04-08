@@ -16,17 +16,20 @@ export default class ArticleDb {
         return ArticleDb.instance;
     }
 
-    public async insertArticle(article: Article) {
-        await this.db.articles.create({
+    public async insertArticle(article: Prisma.ArticlesCreateInput) {
+        const articleCreate = await this.db.articles.create({
             "data": {
                 "Title": article.Title,
                 "StorageArticleUUID": article.StorageArticleUUID,
                 "Active": article.Active
             }
         })
+        
+        return articleCreate.ArticleID;
     }
 
-    public async updateArticle(articleId: Article["ArticleID"], article: Article) {
+    public async updateArticle(articleId: Prisma.ArticlesWhereUniqueInput["ArticleID"], 
+                                article: Prisma.ArticlesUpdateInput) {
         await this.db.articles.update({
             "where": {
                 "ArticleID": articleId
@@ -38,14 +41,14 @@ export default class ArticleDb {
             }
         })
     }
-    public async getArticleById(articleId: Article["ArticleID"]) {
+    public async getArticleById(articleId: Prisma.ArticlesWhereUniqueInput["ArticleID"]) {
         return await this.db.articles.findUnique({
             "where": {
                 "ArticleID": articleId
             }
         })
     }
-    public async countArticleByStorageUUID(storageArticleUUID: Article["StorageArticleUUID"]) {
+    public async countArticleByStorageUUID(storageArticleUUID: Prisma.ArticlesWhereUniqueInput["StorageArticleUUID"]) {
         return await this.db.articles.count({
             "where": {
                 "StorageArticleUUID": storageArticleUUID
@@ -53,7 +56,7 @@ export default class ArticleDb {
         })
     }
 
-    public async countArticleByArticleId(articleId: Article["ArticleID"]) {
+    public async countArticleByArticleId(articleId: Prisma.ArticlesWhereUniqueInput["ArticleID"]) {
         return await this.db.articles.count({
             "where": {
                 "ArticleID": articleId
@@ -61,14 +64,14 @@ export default class ArticleDb {
         })
     }
 
-    public async deleteArticleById(articleId: Article["ArticleID"]) {
+    public async deleteArticleById(articleId: Prisma.ArticlesDeleteArgs["where"]["ArticleID"]) {
         await this.db.articles.delete({
             "where": {
                 "ArticleID": articleId
             }
         })
     }
-    public async deleteArticleByStorageUUID(storageArticleUUID: Article["StorageArticleUUID"]) {
+    public async deleteArticleByStorageUUID(storageArticleUUID: Prisma.ArticlesDeleteArgs["where"]["StorageArticleUUID"]) {
         await this.db.articles.delete({
             "where": {
                 "StorageArticleUUID": storageArticleUUID

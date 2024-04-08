@@ -8,9 +8,9 @@ describe('Article Database', () => {
     test("Insert an Article", async () => {
         
         const article = {
-            title: "Test Article",
-            storageArticleUUID: crypto.randomUUID(),
-            active: true
+            Title: "Test Article",
+            StorageArticleUUID: crypto.randomUUID(),
+            Active: true
         };
         await articleDb.insertArticle(article);
     });
