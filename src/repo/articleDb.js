@@ -20,7 +20,7 @@ export default class ArticleDb {
         let conn;
         try {
             conn = await this.#dbPool.getConnection();
-            const query = `INSERT INTO Articles (Title, StorageArticleUUID, Active, ArticleID) VALUES (?, ?, ?)`;
+            const query = `INSERT INTO Articles (Title, StorageArticleUUID, Active) VALUES (?, ?, ?)`;
             const [result] = await conn.execute(query, [article.title, article.storageArticleUUID, article.active]);
             return result;
 
@@ -44,7 +44,7 @@ export default class ArticleDb {
             if (conn) conn.release();
         }
     }
-    async getArticle(articleId) {
+    async getArticleById(articleId) {
         let conn;
         try {
             conn = await this.#dbPool.getConnection();
@@ -85,7 +85,7 @@ export default class ArticleDb {
         }
     }
 
-    async deleteArticle(articleId) {
+    async deleteArticleById(articleId) {
         let conn;
         try {
             conn = await this.#dbPool.getConnection();

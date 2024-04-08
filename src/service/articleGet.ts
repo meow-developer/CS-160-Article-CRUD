@@ -36,7 +36,7 @@ export default class ArticleGetService {
     }
 
     private async getArticleStorageUUIDFromDb(): Promise<UUID> {
-        const article = await this.articleDb.getArticle(this.articleId);
+        const article = await this.articleDb.getArticleById(this.articleId);
         return crypto.randomUUID();
     }
 
