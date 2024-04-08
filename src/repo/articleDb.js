@@ -70,6 +70,21 @@ export default class ArticleDb {
             if (conn) conn.release();
         }
     }
+
+    async countArticleByArticleId(articleId) {
+        let conn;
+        try {
+            conn = await this.#dbPool.getConnection();
+            const query = `SELECT COUNT(*) as count FROM Articles WHERE ArticleId = ?`;
+            const [result] = await conn.execute(query, [articleId]);
+            return result[0].count;
+        } catch (error) {
+            throw error;
+        } finally {
+            if (conn) conn.release();
+        }
+    }
+
     async deleteArticle(articleId) {
         let conn;
         try {

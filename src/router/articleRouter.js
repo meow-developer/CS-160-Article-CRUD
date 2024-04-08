@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import * as articleController from '../controller/articleController.js';
 
-
-
 const router = Router();
 
 

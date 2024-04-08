@@ -22,20 +22,6 @@ export default class ArticleStorage {
         return this.instance;
     }
 
-    private async sendCommand(command: GetObjectCommand | DeleteObjectCommand | PutObjectCommand): Promise<any> {
-        try {
-            return await this.s3Client.send(command);
-            
-        } catch (err) {
-            if (err instanceof S3ServiceException) {
-                console.error("S3 Error")
-            } else {
-                console.error("Unknown Error with interacting with S3")
-            }
-            console.error(err);
-            throw err;
-        }
-    }
 
     private async articleFileToStream(articlePath: PathLike): Promise<ReadStream> {
         const file = await open(articlePath, 'r');
@@ -56,7 +42,7 @@ export default class ArticleStorage {
             Body: await this.articleFileToStream(articleFilePath)
         });
 
-        await this.sendCommand(command);
+        await this.s3Client.send(command);
 
     }
 
@@ -69,21 +55,21 @@ export default class ArticleStorage {
             Key: articleUUID,
         });
 
-        await this.sendCommand(command);
+        await this.s3Client.send(command);
     }
 
-    public async getArticle(articleUUID: string) {
+    public async getArticle(articleUUID: string): Promise<ReadableStream> {
         /**
          * @see {@link https://docs.aws.amazon.com/AmazonS3/latest/userguide/example_s3_GetObject_section.html}
          */
-        const command = new GetObjectCommand({
+        const command: GetObjectCommand = new GetObjectCommand({
             Bucket: this.bucketName,
             Key: articleUUID,
         });
 
-        const response = await this.sendCommand(command);
-        const responseStr = await response.Body?.transformToString();
-        return responseStr;
+        const response = await this.s3Client.send(command);
+        const responseStream = await response.Body?.transformToWebStream();
+        return responseStream!;
 
     }
 

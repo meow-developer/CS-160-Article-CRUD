@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import ArticleCreateService from '../service/articleCreate.js';
+import ArticleGetService, { ArticleGetError } from '../service/articleGet.js';
 import { pdfUpload } from '../middleware/pdfUpload.js';
 import { ArticleFileValidateFailError } from '../validator/article.js';
 
@@ -27,7 +28,7 @@ const createArticle = (req, res) => {
 
         const articleFile = req.file;
         const articleCreateService = new ArticleCreateService();
-        
+
         articleCreateService.save(articleFile).then(()=>{
             res.status(201).send('Article created successfully');
         }).catch((err)=>{
@@ -68,11 +69,27 @@ const listArticle = (req, res) => {
  * @param {Response} res - Response object
  * @returns {void}
  */
-const getArticle = (req, res) => {
+const getArticle = async (req, res) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
+    const articleGetService = new ArticleGetService();
 
+    try {
+        const articleFilePath = await articleGetService.getArticle(articleId);
+        res.status(200).sendFile(articleFilePath);
+        await articleGetService.deleteArticleFromDisk();
+
+    } catch (err) {
+        if (err instanceof ArticleGetError) {
+            res.status(err.statusCode).send(err.message);
+            return;
+        } else {
+            res.status(500).send('Internal Server Error');
+            return;
+        
+        }
+    }
 };
 
 /**
