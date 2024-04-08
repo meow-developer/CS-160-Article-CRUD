@@ -71,7 +71,7 @@ export default class ArticleGetService {
         await unlink(this.articlePath!);
     }
 
-    public async getArticle(): Promise<PathLike>{
+    public async get(): Promise<PathLike>{
         await this.checkArticleExist();
         await this.loadArticleFromDb();
         this.loadArticleStorageFilePath();
