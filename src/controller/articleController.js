@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import ArticleCreateService from '../service/articleCreate.js';
 import ArticleGetService, { ArticleGetError } from '../service/articleGet.js';
 import { pdfUpload } from '../middleware/pdfUpload.js';

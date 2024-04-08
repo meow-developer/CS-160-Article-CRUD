@@ -14,16 +14,19 @@ export default class ArticleCreateService {
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
 
     private generateUUIDForArticleStore(): UUID {
+        console.log("Generating UUID");
         return crypto.randomUUID();
     }
 
-    private async checkUUIDDbCollision(uuid: string) {
+    private async checkUUIDDbCollision(uuid: UUID) {
+        console.log("Checking UUID collision")
         const articleCount = await this.articleDb.countArticleByStorageUUID(uuid);
         const isUUIDCollision = articleCount > 0;
         
         if(isUUIDCollision){
             throw new ArticleCreateError("UUID collision");
         }
+        console.log("UUID collision check passed")
     }
 
     private async writeArticleToDb(
@@ -36,6 +39,7 @@ export default class ArticleCreateService {
             Active: true,
         }
         await this.articleDb.insertArticle(article);
+        console.log("Article written to db")
     }
 
     private async deleteArticleFromDb(articleStorageUUID: UUID){
@@ -54,6 +58,7 @@ export default class ArticleCreateService {
             articleStorageUUID,
             articleFilePath
         )
+        console.log("Article saved to storage")
     }
 
     public async save(file: Express.Multer.File){
@@ -64,10 +69,12 @@ export default class ArticleCreateService {
             await this.writeArticleToDb(file.originalname, articleStorageUUID);
             await this.saveArticleToStorage(articleStorageUUID, file.path);
         } catch (err) {
+            console.log(err)
+
             //Ensure atomicity
             //Undo all the changes made to the db and storage
-            this.deleteArticleFromDb(articleStorageUUID);
-            this.deleteArticleFromStorage(articleStorageUUID);
+            await this.deleteArticleFromDb(articleStorageUUID);
+            await this.deleteArticleFromStorage(articleStorageUUID);
 
             throw err;
         }

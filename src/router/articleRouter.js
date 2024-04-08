@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import * as articleController from '../controller/articleController.js';
+import { pdfUpload } from '../middleware/pdfUpload.js';
+
 
 const router = Router();
 

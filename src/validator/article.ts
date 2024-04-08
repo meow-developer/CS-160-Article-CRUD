@@ -20,7 +20,7 @@ export class ArticleFileValidator {
     }
 
     private checkFileExtension(file: Express.Multer.File) {
-        const allowedExtensions = ["pdf"];
+        const allowedExtensions = ["application/pdf"];
 
         if (!allowedExtensions.includes(file.mimetype)) {
             throw new ArticleFileValidateFailError("Invalid file extension");

@@ -29,5 +29,11 @@ describe('Article Database', () => {
         await articleDb.deleteArticleById(ARTICLE_ID);
     });
 
+    test("Count Article By Storage UUID", async () => {
+        const STORAGE_UUID = "1";
+        const articleCount = await articleDb.countArticleByStorageUUID(STORAGE_UUID);
     
+        expect(articleCount).toBe(0);
+    })
+
 });
