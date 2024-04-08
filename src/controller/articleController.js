@@ -1,10 +1,11 @@
-import ArticleCreateService from '../service/articleCreate.js';
-import ArticleGetService, { ArticleGetError } from '../service/articleGet.js';
-import ArticleDeleteService, { ArticleDeleteError } from '../service/articleDelete.js';
-
-
 import { pdfUpload } from '../middleware/pdfUpload.js';
 import { ArticleFileValidateFailError } from '../validator/articleFile.js';
+
+import ArticleCreateService from '../service/articleCreate.js';
+import ArticleGetService from '../service/articleGet.js';
+import ArticleDeleteService from '../service/articleDelete.js';
+
+import { handleRestError } from './restErrorHandler.js';
 
 /**
  * Creating a new article
@@ -83,14 +84,7 @@ const getArticle = async (req, res) => {
         await articleGetService.deleteArticleFromDisk();
 
     } catch (err) {
-        if (err instanceof ArticleGetError) {
-            res.status(err.statusCode).send(err.message);
-            return;
-        } else {
-            res.status(500).send('Internal Server Error');
-            return;
-        
-        }
+        handleRestError(err, res);
     }
 };
 
@@ -119,13 +113,18 @@ const updateArticle = (req, res) => {
  * @returns {void}
  */
 
-const deleteArticle = (req, res) => {
+const deleteArticle = async (req, res) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
+    const articleDeleteService = new ArticleDeleteService();
 
-
-
+    try {
+        await articleDeleteService.delete(articleId);
+        res.status(200).send('Article deleted successfully');
+    } catch (err) {
+        handleRestError(err, res);
+    }
 };
 
 export {createArticle, listArticle, getArticle, updateArticle, deleteArticle};
