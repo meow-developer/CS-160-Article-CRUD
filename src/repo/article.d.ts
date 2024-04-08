@@ -1,6 +1,8 @@
+import { UUID } from "crypto"
+
 export type Article = {
     Title: string,
-    StorageArticleUUID: `${string}-${string}-${string}-${string}-${string}`,
+    StorageArticleUUID: UUID,
     Active: boolean,
     ArticleID?: string
 }
