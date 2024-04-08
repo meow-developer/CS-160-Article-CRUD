@@ -75,4 +75,9 @@ export default class ArticleDb {
             }
         })
     }
+    public async getArticles(limit: number = 10) {
+        return await this.db.articles.findMany({
+            take: limit
+        });
+    }
 }
