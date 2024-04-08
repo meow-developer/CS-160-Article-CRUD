@@ -9,8 +9,8 @@ datasource db {
 
 model Articles {
   ArticleID          Int           @id @default(autoincrement())
-  Title              String?       @db.VarChar(255)
-  StorageArticleUUID String?       @unique(map: "StorageArticleUUID") @db.VarChar(255)
+  Title              String        @db.VarChar(255)
+  StorageArticleUUID String        @unique(map: "StorageArticleUUID") @db.VarChar(255)
   Active             Boolean       @default(true)
   Diagram            Diagram?
   UserArticle        UserArticle[]

@@ -2,7 +2,6 @@ import ArticleDb from '../repo/articleDb.js';
 import { Article } from '../repo/article.js';
 import { UUID } from 'crypto';
 import ArticleStorage from '../repo/articleStorage.js';
-import { ReadableStream } from 'stream/web';
 import { open, unlink } from 'fs/promises';
 import { PathLike } from 'fs';
 
@@ -18,7 +17,7 @@ export class ArticleGetError extends Error {
 export default class ArticleGetService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
-    private articleStorageUUID: UUID | undefined;
+    private article: Article | undefined;
     private articlePath: PathLike | undefined;
     private articleId: number;
 
@@ -35,19 +34,23 @@ export default class ArticleGetService {
         }
     }
 
-    private async getArticleStorageUUIDFromDb(): Promise<UUID> {
+    private async loadArticleFromDb() {
         const article = await this.articleDb.getArticleById(this.articleId);
-        return crypto.randomUUID();
+
+        if (!article) {
+            throw new Error("Article not found in db");
+        }
+
+        this.article = article;
     }
 
-    private async loadArticleStorageUUIDPath() {
-        const articleStorageUUID = await this.getArticleStorageUUIDFromDb();
-        this.articleStorageUUID = articleStorageUUID;
-        this.articlePath = articleStorageUUID + ".pdf";
+    private async loadArticleStorageFilePath() {
+        const articleOriginalFileName = this.article?.Title;
+        this.articlePath = articleOriginalFileName + ".pdf";
     }
 
-    private async getArticleStreamFromStorage(): Promise<any> {
-        return await this.articleStorage.getArticle(this.articleStorageUUID!);
+    private async getArticleStreamFromStorage(): Promise<ReadableStream> {
+        return await this.articleStorage.getArticle(this.article?.StorageArticleUUID!);
     }
 
 
@@ -68,9 +71,11 @@ export default class ArticleGetService {
         await unlink(this.articlePath!);
     }
 
-    public async getArticle(articleId: string): Promise<PathLike>{
+    public async getArticle(): Promise<PathLike>{
         await this.checkArticleExist();
-        await this.loadArticleStorageUUIDPath();
+        await this.loadArticleFromDb();
+        this.loadArticleStorageFilePath();
+
         const articleStream = await this.getArticleStreamFromStorage();
         await this.saveArticleToDisk(articleStream)
 

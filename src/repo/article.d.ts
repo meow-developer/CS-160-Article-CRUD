@@ -2,7 +2,7 @@ import { UUID } from "crypto"
 
 export type Article = {
     Title: string,
-    StorageArticleUUID: UUID,
+    StorageArticleUUID: UUID | string,
     Active: boolean,
     ArticleID?: number
 }
