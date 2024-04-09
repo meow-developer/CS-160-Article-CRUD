@@ -15,15 +15,6 @@ export default class ArticleGetService {
     constructor(articleId: number){
         this.articleId = articleId;
     }
-    
-    private async checkArticleExist() {
-        const articleCount = await this.articleDb.countArticleByArticleId(this.articleId);
-        const isArticleExist = articleCount > 0;
-
-        if (!isArticleExist) {
-            throw new ServiceRestError("Article not found", 404);
-        }
-    }
 
     private async loadArticleFromDb() {
         const article = await this.articleDb.getArticleById(this.articleId);
@@ -63,7 +54,6 @@ export default class ArticleGetService {
     }
 
     public async get(): Promise<PathLike>{
-        await this.checkArticleExist();
         await this.loadArticleFromDb();
         this.loadArticleStorageFilePath();
 

@@ -13,16 +13,6 @@ export default class ArticleDeleteService {
     constructor(articleId: number){
         this.articleId = articleId;
     }
-
-    private async checkArticleExist() {
-        const articleCount = await this.articleDb.countArticleByArticleId(this.articleId);
-        const isArticleExist = articleCount > 0;
-
-        if (!isArticleExist) {
-            throw new ServiceRestError("Article not found", 404);
-        }
-    }
-
     private async loadArticleFromDb() {
         const article = await this.articleDb.getArticleById(this.articleId);
         this.article = article!;
@@ -37,7 +27,6 @@ export default class ArticleDeleteService {
         await this.articleStorage.deleteArticle(this.article?.StorageArticleUUID!);
     }
     public async delete() {
-        await this.checkArticleExist();
         await this.loadArticleFromDb();
         await this.deactivateArticleInDb();
         await this.deleteArticleInStorage();
