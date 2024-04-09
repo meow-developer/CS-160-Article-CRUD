@@ -1,4 +1,4 @@
-import { ArticleFileValidator } from '../validator/articleFile.js';
+import { ArticleFileValidator } from './validator/articleFile.js';
 import multer from 'multer'
 
 export const pdfUpload = multer({ 
@@ -8,4 +8,4 @@ export const pdfUpload = multer({
         fileSize: 1024 * 1024 * 30, // 30MB
         files: 1
     }
-});
+}).single('pdf');

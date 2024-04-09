@@ -1,15 +1,10 @@
 import { FileFilterCallback } from 'multer';
-import { Request } from 'express';
-import TextTokenCounterService from '../service/countTextToken.js';
+import { NextFunction, Request, Response } from 'express';
+import TextTokenCounterService from '../../service/countTextToken.js';
 import { PathLike } from 'fs';
 import { readPdfText } from 'pdf-text-reader';
+import ValidationRestError from './ValidationRestError.js'
 
-
-export class ArticleFileValidateFailError extends Error {
-    constructor(message: string) {
-        super(message);
-    }
-}
 
 export class ArticleFileValidator {
     private ARTICLE_TOKEN_LIMIT = 3500;
@@ -18,7 +13,7 @@ export class ArticleFileValidator {
         const allowedExtensions = ["application/pdf"];
 
         if (!allowedExtensions.includes(file.mimetype)) {
-            throw new ArticleFileValidateFailError("Invalid file extension");
+            throw new ValidationRestError("Invalid file extension");
         }
 
     }
@@ -39,7 +34,7 @@ export class ArticleFileValidator {
         const articleToken = textTokenCounterService.countTokens();
 
         if (articleToken > this.ARTICLE_TOKEN_LIMIT) {
-            throw new ArticleFileValidateFailError("Article token limit exceeded");
+            throw new ValidationRestError("Article token limit exceeded", 413, "PDF File has too many tokens");
         }
 
     }
@@ -51,11 +46,18 @@ export class ArticleFileValidator {
             this.checkFileToken(articleText);
             cb(null, true);
         }).catch((err) => {
-            if (err instanceof ArticleFileValidateFailError) {
+            if (err instanceof ValidationRestError) {
                 cb(err);
             } else {
                 cb(new Error("Internal server error handling pdf file upload"));
             }
         });
     }
+}
+
+export const checkUploadFileExist = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.file || req.files?.length === 0) {
+        throw new ValidationRestError("No article file provided");
+    }
+    next();
 }

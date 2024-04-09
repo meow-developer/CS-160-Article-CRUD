@@ -9,7 +9,7 @@ export default class ArticleGetService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
     private article: Article | undefined;
-    private articlePath: PathLike | undefined;
+    private articlePath: string | undefined;
     private articleId: number;
 
     constructor(articleId: number){
@@ -53,7 +53,7 @@ export default class ArticleGetService {
         await unlink(this.articlePath!);
     }
 
-    public async get(): Promise<PathLike>{
+    public async get(): Promise<string>{
         await this.loadArticleFromDb();
         this.loadArticleStorageFilePath();
 

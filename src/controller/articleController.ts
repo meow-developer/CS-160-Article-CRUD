@@ -1,26 +1,25 @@
 import { pdfUpload } from '../middleware/pdfUpload.js';
-import { ArticleFileValidateFailError } from '../validator/articleFile.js';
+import ValidationRestError from '../middleware/validator/ValidationRestError.js';
 
 import ArticleCreateService from '../service/articleCreate.js';
 import ArticleGetService from '../service/articleGet.js';
 import ArticleDeleteService from '../service/articleDelete.js';
 
 import { handleRestError } from './restErrorHandler.js';
+import { NextFunction, Request, Response } from 'express';
+import multer from 'multer';
 
 /**
  * Creating a new article
  * HTTP Method: POST
  * Path: /article
- * 
- * @param {Request} req - Request object
- * @param {Response} res - Response object
- * @returns {void}
  */
-const createArticle = (req, res) => {
+const createArticle = (req: Request, res: Response, next: NextFunction) => {
     pdfUpload(req, res, (err) => {
 
+        //File Validation Error
         if (err) {
-            if (err instanceof ArticleFileValidateFailError) {
+            if (err instanceof ValidationRestError) {
                 res.status(400).send(err.message);
                 return;
             } else {
@@ -29,7 +28,7 @@ const createArticle = (req, res) => {
             }
         }
 
-        const articleFile = req.file;
+        const articleFile = req.file!; //The file is guaranteed to exist at this point
         const articleCreateService = new ArticleCreateService();
 
         articleCreateService.save(articleFile).then(()=>{
@@ -37,6 +36,7 @@ const createArticle = (req, res) => {
         }).catch((err)=>{
             res.status(500).send('Internal Server Error');
         });
+
     })
 };
 
@@ -49,7 +49,7 @@ const createArticle = (req, res) => {
  * @param {Response} res - Response object
  * @returns {void}
  */
-const listArticle = (req, res) => {
+const listArticle = (req: Request, res: Response) => {
     const query = req.query;
     // Default limit for the number of articles to fetch
     const DEFAULT_ARTICLE_COUNT_LIMIT = 10;
@@ -72,14 +72,14 @@ const listArticle = (req, res) => {
  * @param {Response} res - Response object
  * @returns {void}
  */
-const getArticle = async (req, res) => {
+const getArticle = async (req: Request, res: Response) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
-    const articleGetService = new ArticleGetService();
+    const articleGetService = new ArticleGetService(parseInt(articleId));
 
     try {
-        const articleFilePath = await articleGetService.getArticle(articleId);
+        const articleFilePath = await articleGetService.get();
         res.status(200).sendFile(articleFilePath);
         await articleGetService.deleteArticleFromDisk();
 
@@ -97,7 +97,7 @@ const getArticle = async (req, res) => {
  * @param {Response} res - Response object
  * @returns {void}
  */
-const updateArticle = (req, res) => {
+const updateArticle = (req: Request, res: Response) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
@@ -113,14 +113,14 @@ const updateArticle = (req, res) => {
  * @returns {void}
  */
 
-const deleteArticle = async (req, res) => {
+const deleteArticle = async (req: Request, res: Response) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
-    const articleDeleteService = new ArticleDeleteService();
+    const articleDeleteService = new ArticleDeleteService(parseInt(articleId));
 
     try {
-        await articleDeleteService.delete(articleId);
+        await articleDeleteService.delete();
         res.status(200).send('Article deleted successfully');
     } catch (err) {
         handleRestError(err, res);
