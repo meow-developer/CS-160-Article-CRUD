@@ -9,10 +9,10 @@ import ValidationRestError from './ValidationRestError.js'
 export class ArticleFileValidator {
     private ARTICLE_TOKEN_LIMIT = 3500;
 
-    private checkFileExtension(file: Express.Multer.File) {
-        const allowedExtensions = ["application/pdf"];
+    private checkFileMimeType (file: Express.Multer.File) {
+        const allowedMimeType = "application/pdf";
 
-        if (!allowedExtensions.includes(file.mimetype)) {
+        if (allowedMimeType !== file.mimetype) {
             throw new ValidationRestError("Invalid file extension");
         }
 
@@ -41,7 +41,7 @@ export class ArticleFileValidator {
 
     public fileFilter(req: Request, file: Express.Multer.File, cb: FileFilterCallback): void {
         
-        this.checkFileExtension(file);
+        this.checkFileMimeType(file);
         this.getArticlePdfText(file.path).then((articleText) => {
             this.checkFileToken(articleText);
             cb(null, true);

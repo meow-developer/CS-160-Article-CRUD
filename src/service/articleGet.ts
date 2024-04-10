@@ -19,11 +19,7 @@ export default class ArticleGetService {
     private async loadArticleFromDb() {
         const article = await this.articleDb.getArticleById(this.articleId);
 
-        if (!article) {
-            throw new Error("Article not found in db");
-        }
-
-        this.article = article;
+        this.article = article!;
     }
 
     private async loadArticleStorageFilePath() {

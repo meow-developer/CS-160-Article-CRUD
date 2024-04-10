@@ -1,18 +1,19 @@
 import { open } from 'node:fs/promises';
 import { ReadStream } from "fs";
-import AwsS3Conn from "./s3Conn.js";
 import { S3Client, GetObjectCommand, DeleteObjectCommand, PutObjectCommand, S3ServiceException } from "@aws-sdk/client-s3";
 import { PathLike } from 'node:fs';
 
 export default class ArticleStorage {
     public static instance: ArticleStorage;
-    private bucketName: string = "";
     private s3Client: S3Client;
+    private bucketName: string = "";
 
     private constructor() {
-        this.loadEnvBucketName();
-        const awsS3Conn = AwsS3Conn.getInstance();
-        this.s3Client = awsS3Conn.getS3Client();
+        const awsBucketConfig = this.loadEnvBucketConfig();
+        this.bucketName = awsBucketConfig[0];
+        this.s3Client = new S3Client({
+            region: awsBucketConfig[1]
+        });
     }
 
     public static getInstance(): ArticleStorage {
@@ -73,15 +74,20 @@ export default class ArticleStorage {
 
     }
 
-    private loadEnvBucketName() {
+    private loadEnvBucketConfig() {
         const ARTICLE_BUCKET_NAME_ENV_KEY = "AWS_ARTICLE_BUCKET_NAME";
+        const ARTICLE_BUCKET_REGION_ENV_KEY = "AWS_ARTICLE_BUCKET_REGION";
 
         const envBucketName = process.env[ARTICLE_BUCKET_NAME_ENV_KEY];
+        const envBucketRegion = process.env[ARTICLE_BUCKET_REGION_ENV_KEY];
 
-        if (!envBucketName) {
-            throw new Error("Missing AWS bucket name in environment variables");
+        if (!envBucketName || !envBucketRegion) {
+            throw new Error("Missing AWS environment variables");
         }
 
-        this.bucketName = envBucketName;
+        return [
+            envBucketName,
+            envBucketRegion
+        ]
     }
 }
