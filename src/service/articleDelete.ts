@@ -1,7 +1,6 @@
 import { Article } from '../repo/article.js';
 import ArticleDb from '../repo/articleDb.js';
 import ArticleStorage from '../repo/articleStorage.js';
-import { ServiceRestError } from './ServiceRestError.js';
 
 
 export default class ArticleDeleteService {

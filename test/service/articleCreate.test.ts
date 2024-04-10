@@ -2,7 +2,6 @@
 //Disable typescript checking to allow private method testing
 
 import ArticleCreateService from "../../src/service/articleCreate";
-import { createReadStream } from "fs";
 import crypto from "crypto";
 import { dirname } from "path";
 

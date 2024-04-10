@@ -2,8 +2,6 @@ import ArticleDb from '../repo/articleDb.js';
 import { Article } from '../repo/article.js';
 import ArticleStorage from '../repo/articleStorage.js';
 import { open, unlink } from 'fs/promises';
-import { PathLike } from 'fs';
-import { ServiceRestError } from './ServiceRestError.js';
 
 export default class ArticleGetService {
     private articleDb: ArticleDb = ArticleDb.getInstance();

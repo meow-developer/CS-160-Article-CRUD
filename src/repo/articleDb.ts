@@ -1,4 +1,3 @@
-import { Article } from './article.js';
 import { Prisma, PrismaClient } from '@prisma/client'
 
 export default class ArticleDb {
