@@ -3,39 +3,26 @@ import ArticleGetService from '../service/articleGet.js';
 import ArticleDeleteService from '../service/articleDelete.js';
 
 import { NextFunction, Request, Response } from 'express';
-import ValidationRestError, { throwOwnValidatorError } from '../middleware/validator/ValidationRestError.js';
-import { CustomRequest, OwnValidationResult } from '../middleware/validator/ownValidator.js';
-import { pdfUpload } from '../middleware/pdfUpload.js';
-import { MulterError } from 'multer';
 
 /**
  * Creating a new article
  * HTTP Method: POST
  * Path: /article
  */
-const createArticle = (req: Request, res: Response, next: NextFunction) => {
-    pdfUpload(req, res, (err: any) => {
-        if (err) {
-            next(err);
-            return;
-        };
-    })
-
-    throwOwnValidatorError(req)
-    .then(() => {
-        const articleFile = req.file!; //The file is guaranteed to exist at this point
-        console.log(req.files);
+const createArticle = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const articleFile = req.ownValidation.extra.get('pdf'); //The file is guaranteed to exist at this point
         const articleCreateService = new ArticleCreateService();
 
-        return articleCreateService.save(articleFile);
-    })
-    .then(() => {
+        await articleCreateService.save(articleFile);
         res.status(200).send('Article created successfully');
-        next();
-    })
-    .catch(err => {
+        
+        const articleRemove = req.ownValidation.extra.get('pdfRemove');
+        await articleRemove();
+        
+    } catch (err) {
         next(err);
-    });
+    }
 };
 
 /**

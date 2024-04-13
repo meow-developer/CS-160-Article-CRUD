@@ -3,7 +3,8 @@ import * as articleController from '../controller/articleController.js';
 import { articleIdValidator } from '../middleware/validator/article.js';
 
 import ArticleFileValidator from '../middleware/validator/articleFile.js';
-import { errorHandlingMiddleware} from '../middleware/restErrorHandler.js';
+import bodyParser from 'body-parser';
+
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.post('/',
     new ArticleFileValidator()._,
     articleController.createArticle
 );
+
 
 router.get(`/`, articleController.listArticle);
 
@@ -20,5 +22,4 @@ router.put('/:articleId', articleIdValidator, new ArticleFileValidator()._, arti
 
 router.delete('/:articleId', articleIdValidator, articleController.deleteArticle);
 
-router.use(errorHandlingMiddleware);
 export default router;

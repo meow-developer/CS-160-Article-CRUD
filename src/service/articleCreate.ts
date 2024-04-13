@@ -3,6 +3,7 @@ import ArticleDb from '../repo/articleDb.js';
 import { Article } from '../repo/article.js';
 import ArticleStorage from  '../repo/articleStorage.js';
 import { ServiceRestError } from './ServiceRestError.js';
+import formidable from 'formidable';
 
 export default class ArticleCreateService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
@@ -66,12 +67,12 @@ export default class ArticleCreateService {
         )
     }
 
-    public async save(file: Express.Multer.File){
+    public async save(file: formidable.File){
         const articleStorageUUID = await this.safeUUIDGeneration();
         try {
 
-            await this.writeArticleToDb(file.originalname, articleStorageUUID);
-            await this.saveArticleToStorage(articleStorageUUID, file.path);
+            await this.writeArticleToDb(file.originalFilename!, articleStorageUUID);
+            await this.saveArticleToStorage(articleStorageUUID, file.filepath);
 
         } catch (err) {
             //Ensure atomicity

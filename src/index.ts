@@ -1,7 +1,7 @@
 import express from 'express';
 import articleRouter from './router/articleRouter.js';
 import cors from 'cors';
-import bodyParser from 'body-parser';
+import { errorHandlingMiddleware } from './middleware/restErrorHandler.js';
 
 const app = express();
 const PORT = 8080;
@@ -17,6 +17,7 @@ app.use(cors(CORS_OPTIONS));
 
 app.use(`/${ARTICLE_API_ENDPOINT}`, articleRouter);
 
+app.use(errorHandlingMiddleware);
 
 app.listen(PORT, () => {
   console.log(`Server running at port: ${PORT}`);

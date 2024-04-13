@@ -1,8 +1,13 @@
-import { Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { RestError } from "../restError.js";
 
 
-export const errorHandlingMiddleware = (err: any, req: any, res: Response, next: any) => { 
+export const loggingError = (err: any) => {
+    console.error(err);
+}
+
+export const errorHandlingMiddleware = (err: any, req: Request, res: Response, next: NextFunction) => { 
+    loggingError(err);
     if (res.headersSent) {
         return next(err)
     }
@@ -13,4 +18,5 @@ export const errorHandlingMiddleware = (err: any, req: any, res: Response, next:
         res.status(500).send('Internal Server Error');
         return;
     }
+
 }

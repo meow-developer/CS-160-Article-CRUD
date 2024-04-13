@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import TextTokenCounterService from '../../service/countTextToken.js';
 import { readPdfText } from 'pdf-text-reader';
-import { CustomRequest, OwnValidator } from './ownValidator.js';
+import { OwnValidator } from './ownValidator.js';
 import formidable, { EmitData } from 'formidable';
 import IncomingForm from 'formidable/Formidable.js';
 import fs from 'fs';
 
-
-export default class ArticleFileValidator extends OwnValidator{
+export default class ArticleFileValidator extends OwnValidator {
     private ARTICLE_TOKEN_LIMIT = 3500;
     private multipartForm: [formidable.Fields<string>, formidable.Files<string>] | null = null;
     private FORM_FILE_FIELD = "pdf";
@@ -30,14 +29,14 @@ export default class ArticleFileValidator extends OwnValidator{
             throw new Error("Error reading pdf text");
         }
     }
-    
-    
+
+
     private checkFileToken(articleText: string): boolean {
         const textTokenCounterService = new TextTokenCounterService(articleText);
         const articleToken = textTokenCounterService.countTokens();
-    
+
         if (articleToken > this.ARTICLE_TOKEN_LIMIT) {
-            this.addFailResult(this.checkFileToken.name, "Article token length exceeded", 400);
+            this.addFailStep(this.checkFileToken.name, "Article token length exceeded", 400);
             return false;
         } else {
             this.addPassResult(this.checkFileToken.name);
@@ -59,8 +58,8 @@ export default class ArticleFileValidator extends OwnValidator{
             });
         });
     }
-    
-    private async deleteUploadFile(): Promise<void>{
+
+    private async deleteUploadFile(): Promise<void> {
         // await this.getFormEnd();
         fs.unlinkSync(this.uploadPdfFile!.filepath);
     }
@@ -74,7 +73,7 @@ export default class ArticleFileValidator extends OwnValidator{
         });
     }
 
-    private async loadMultipartForm(req: Request): Promise<void>{
+    private async loadMultipartForm(req: Request): Promise<void> {
         return new Promise((resolve, reject) => {
             this.form!.parse(req, (err, fields, files) => {
                 if (err) {
@@ -89,50 +88,47 @@ export default class ArticleFileValidator extends OwnValidator{
     private loadUploadFile(): void {
         this.uploadPdfFile = this.multipartForm![1][this.FORM_FILE_FIELD]![0];
     }
-        
 
-    private async checkArticleFileExists (req: Request): Promise<boolean> {
+
+    private async checkArticleFileExists(req: Request) {
         const formField = this.multipartForm![1][this.FORM_FILE_FIELD];
 
         if (formField! && !formField![0]) {
-            this.addFailResult(this.checkArticleFileExists.name, "No pdf file found in the request", 400);
-            return false;
+            this.addFailStep(this.checkArticleFileExists.name, "No pdf file found in the request", 400);
         }
-        
-        this.addPassResult(this.checkArticleFileExists.name);
-        return true;
+
+        this.addPassResult(this.checkArticleFileExists.name, `File ${formField![0].originalFilename} found in the request`);
     }
 
-    private checkMimeType(req: Request): boolean {
+    private checkMimeType(req: Request) {
         if (this.uploadPdfFile!.mimetype !== "application/pdf") {
-            this.addFailResult(this.checkMimeType.name, "Invalid file type", 400);
-            return false;
+            this.addFailStep(this.checkMimeType.name, "Invalid file type", 400);
         }
         this.addPassResult(this.checkMimeType.name);
-        return true;
+    }
+    private addPdfToRequest(req: Request): void {
+        req.ownValidation!.extra.set("pdf", this.uploadPdfFile);
     }
 
-    public async validate(req: CustomRequest, res: Response, next: NextFunction): Promise<void> {
+    private addPdfRemoveToRequest(req: Request): void {
+        req.ownValidation!.extra.set("pdfRemove", this.deleteUploadFile.bind(this));
+    }
 
+    public async validate(req: Request, res: Response, next: NextFunction): Promise<void> {
+        console.log("Validating article file");
         await this.loadMultipartForm(req);
-
-        if (!this.checkArticleFileExists(req)) {
-            return;
-        }
+        this.checkArticleFileExists(req)
 
         this.loadUploadFile();
-
-        if (!this.checkMimeType(req)) {
-            return;
-        }
-
+        this.checkMimeType(req)
         const articleText = await this.getArticlePdfText();
-
         this.checkFileToken(articleText);
-
+        
+        this.addPdfToRequest(req);
+        this.addPdfRemoveToRequest(req);
         next();
-
-        await this.deleteUploadFile();
+        // await this.deleteUploadFile();
+        console.log("Article file validated")
     }
 }
 

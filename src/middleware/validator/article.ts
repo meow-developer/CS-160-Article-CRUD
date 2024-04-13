@@ -1,6 +1,6 @@
 import { ExpressValidator } from "express-validator";
 import ArticleDb from "../../repo/articleDb.js";
-import ValidationRestError from "./ValidationRestError.js";
+import ValidationRestError from "./ownValidatorError.js";
 
 
 export const articleValidator = new ExpressValidator({
