@@ -1,6 +1,8 @@
-export class ServiceRestError extends Error{
-    statusCode: number;
-    publicMessage: string;
+import { RestError } from "../restError.js";
+
+export class ServiceRestError extends RestError{
+    public statusCode: number;
+    public publicMessage: string;
 
     constructor(internalMessage: string, 
                 statusCode: number = 500, 

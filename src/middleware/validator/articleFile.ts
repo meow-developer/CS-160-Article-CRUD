@@ -1,63 +1,80 @@
 import { FileFilterCallback } from 'multer';
 import { NextFunction, Request, Response } from 'express';
 import TextTokenCounterService from '../../service/countTextToken.js';
-import { PathLike } from 'fs';
 import { readPdfText } from 'pdf-text-reader';
-import ValidationRestError from './ValidationRestError.js'
+import { CustomRequest, OwnValidator } from './ownValidator.js';
+import ValidationRestError from './ValidationRestError.js';
+import formidable from 'formidable';
 
-
-export class ArticleFileValidator {
+export default class ArticleFileValidator extends OwnValidator{
     private ARTICLE_TOKEN_LIMIT = 3500;
+    private multipartForm: [formidable.Fields<string>, formidable.Files<string>] | undefined;
+    private FORM_FILE_FIELD = "pdf";
 
-    private checkFileMimeType (file: Express.Multer.File) {
-        const allowedMimeType = "application/pdf";
-
-        if (allowedMimeType !== file.mimetype) {
-            throw new ValidationRestError("Invalid file extension");
-        }
-
+    constructor() {
+        super();
     }
 
-
-    private async getArticlePdfText(filePath: PathLike): Promise<string> {
+    private async getArticlePdfText(filePath: string): Promise<string> {
         try {
-            return await readPdfText({ filePath: <string>filePath });
+            console.log(filePath)
+            return await readPdfText({ filePath: filePath });
         } catch (err) {
             console.error(err);
             throw new Error("Error reading pdf text");
         }
     }
-
-
-    private checkFileToken(articleText: string): void {
+    
+    
+    private checkFileToken(articleText: string): boolean {
         const textTokenCounterService = new TextTokenCounterService(articleText);
         const articleToken = textTokenCounterService.countTokens();
-
+    
         if (articleToken > this.ARTICLE_TOKEN_LIMIT) {
-            throw new ValidationRestError("Article token limit exceeded", 413, "PDF File has too many tokens");
+            this.addFailResult(this.checkFileToken.name, "Article token length exceeded", 400);
+            return false;
+        } else {
+            this.addPassResult(this.checkFileToken.name);
+            return true;
+        }
+    }
+
+    private async loadMultipartForm(req: Request){
+        const form = new formidable.IncomingForm();
+        this.multipartForm =  await form.parse(req);
+    }
+
+    private async checkArticleFileExists (req: Request): Promise<boolean> {
+        if (!this.multipartForm![1][this.FORM_FILE_FIELD] && !this.multipartForm![1][this.FORM_FILE_FIELD]![0]) {
+            this.addFailResult(this.checkArticleFileExists.name, "No pdf file found in the request", 400);
+            return false;
+        }
+        
+        this.addPassResult(this.checkArticleFileExists.name);
+        return true;
+    }
+
+    private checkMimeType(req: Request): boolean {
+        if (this.multipartForm![1][this.FORM_FILE_FIELD]![0].mimetype !== "application/pdf") {
+            this.addFailResult(this.checkMimeType.name, "Invalid file type", 400);
+            return false;
+        }
+        this.addPassResult(this.checkMimeType.name);
+        return true;
+    }
+
+    public async validate(req: CustomRequest, res: Response): Promise<void> {
+        await this.loadMultipartForm(req);
+
+        if (!this.checkArticleFileExists(req)) {
+            return;
         }
 
-    }
-
-    public fileFilter(req: Request, file: Express.Multer.File, cb: FileFilterCallback): void {
-        
-        this.checkFileMimeType(file);
-        this.getArticlePdfText(file.path).then((articleText) => {
-            this.checkFileToken(articleText);
-            cb(null, true);
-        }).catch((err) => {
-            if (err instanceof ValidationRestError) {
-                cb(err);
-            } else {
-                cb(new Error("Internal server error handling pdf file upload"));
-            }
-        });
+        if (!this.checkMimeType(req)) {
+            return;
+        }
+        const articleText = await this.getArticlePdfText(req.file!.path);
+        this.checkFileToken(articleText);
     }
 }
 
-export const checkUploadFileExist = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.file || req.files?.length === 0) {
-        throw new ValidationRestError("No article file provided");
-    }
-    next();
-}

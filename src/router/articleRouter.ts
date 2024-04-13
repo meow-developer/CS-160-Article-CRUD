@@ -1,19 +1,19 @@
 import { Router } from 'express';
 import * as articleController from '../controller/articleController.js';
 import { articleIdValidator } from '../middleware/validator/article.js';
-import { checkUploadFileExist } from '../middleware/validator/articleFile.js';
+
+import ArticleFileValidator from '../middleware/validator/articleFile.js';
 
 const router = Router();
 
 
+router.post('/', new ArticleFileValidator()._ , articleController.createArticle);
 
 router.get(`/`, articleController.listArticle);
 
 router.get('/:articleId', articleIdValidator, articleController.getArticle);
 
-router.post('/', checkUploadFileExist, articleController.createArticle);
-
-router.put('/:articleId', checkUploadFileExist, articleIdValidator, articleController.updateArticle);
+router.put('/:articleId', articleIdValidator, new ArticleFileValidator()._, articleController.updateArticle);
 
 router.delete('/:articleId', articleIdValidator, articleController.deleteArticle);
 export default router;

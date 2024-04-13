@@ -1,5 +1,4 @@
 import { pdfUpload } from '../middleware/pdfUpload.js';
-import ValidationRestError from '../middleware/validator/ValidationRestError.js';
 
 import ArticleCreateService from '../service/articleCreate.js';
 import ArticleGetService from '../service/articleGet.js';
@@ -7,7 +6,8 @@ import ArticleDeleteService from '../service/articleDelete.js';
 
 import { handleRestError } from './restErrorHandler.js';
 import { NextFunction, Request, Response } from 'express';
-import multer from 'multer';
+import ValidationRestError, { throwOwnValidatorError } from '../middleware/validator/ValidationRestError.js';
+import { CustomRequest } from '../middleware/validator/ownValidator.js';
 
 /**
  * Creating a new article
@@ -16,27 +16,21 @@ import multer from 'multer';
  */
 const createArticle = (req: Request, res: Response, next: NextFunction) => {
     pdfUpload(req, res, (err) => {
+        try {
+            //File Validation Error when the multer is not yet initialized
+            throwOwnValidatorError(req);
+            //File Validation Error when the file exists
+            if (err) {throw err;}
 
-        //File Validation Error
-        if (err) {
-            if (err instanceof ValidationRestError) {
-                res.status(400).send(err.message);
-                return;
-            } else {
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-        }
+            const articleFile = req.file!; //The file is guaranteed to exist at this point
+            const articleCreateService = new ArticleCreateService();
 
-        const articleFile = req.file!; //The file is guaranteed to exist at this point
-        const articleCreateService = new ArticleCreateService();
-
-        articleCreateService.save(articleFile).then(()=>{
-            res.status(201).send('Article created successfully');
-        }).catch((err)=>{
-            res.status(500).send('Internal Server Error');
-        });
-
+            articleCreateService.save(articleFile).then(()=>{
+                res.status(201).send('Article created successfully');
+            })
+        } catch (err) {
+            handleRestError(err, res);
+        }    
     })
 };
 
