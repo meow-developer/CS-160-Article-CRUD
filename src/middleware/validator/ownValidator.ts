@@ -53,6 +53,10 @@ export class OwnValidationResult {
 export abstract class OwnValidator {
     protected ownValidationResult: Test | undefined;
 
+    constructor(){
+        this._ = this._.bind(this);
+    }
+
     protected initReqTest(req: Request){
         const customReq = req as CustomRequest;
 
@@ -80,15 +84,15 @@ export abstract class OwnValidator {
         });
     }
 
-    public _(req: Request, res: Response, next: NextFunction){
+    public async _(req: Request, res: Response, next: NextFunction){
         this.initReqTest(req);
         try {
-            this.validate(req, res);
+            await this.validate(req, res, next);
             next();
         } catch (err) {
             res.status(500).send("Internal server error");
         }
     }
 
-    abstract validate(req: Request, res: Response): void;
+    abstract validate(req: Request, res: Response, next: NextFunction): Promise<void>;
 }

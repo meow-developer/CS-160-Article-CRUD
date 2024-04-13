@@ -1,13 +1,12 @@
-import { pdfUpload } from '../middleware/pdfUpload.js';
-
 import ArticleCreateService from '../service/articleCreate.js';
 import ArticleGetService from '../service/articleGet.js';
 import ArticleDeleteService from '../service/articleDelete.js';
 
-import { handleRestError } from './restErrorHandler.js';
 import { NextFunction, Request, Response } from 'express';
 import ValidationRestError, { throwOwnValidatorError } from '../middleware/validator/ValidationRestError.js';
-import { CustomRequest } from '../middleware/validator/ownValidator.js';
+import { CustomRequest, OwnValidationResult } from '../middleware/validator/ownValidator.js';
+import { pdfUpload } from '../middleware/pdfUpload.js';
+import { MulterError } from 'multer';
 
 /**
  * Creating a new article
@@ -15,23 +14,28 @@ import { CustomRequest } from '../middleware/validator/ownValidator.js';
  * Path: /article
  */
 const createArticle = (req: Request, res: Response, next: NextFunction) => {
-    pdfUpload(req, res, (err) => {
-        try {
-            //File Validation Error when the multer is not yet initialized
-            throwOwnValidatorError(req);
-            //File Validation Error when the file exists
-            if (err) {throw err;}
-
-            const articleFile = req.file!; //The file is guaranteed to exist at this point
-            const articleCreateService = new ArticleCreateService();
-
-            articleCreateService.save(articleFile).then(()=>{
-                res.status(201).send('Article created successfully');
-            })
-        } catch (err) {
-            handleRestError(err, res);
-        }    
+    pdfUpload(req, res, (err: any) => {
+        if (err) {
+            next(err);
+            return;
+        };
     })
+
+    throwOwnValidatorError(req)
+    .then(() => {
+        const articleFile = req.file!; //The file is guaranteed to exist at this point
+        console.log(req.files);
+        const articleCreateService = new ArticleCreateService();
+
+        return articleCreateService.save(articleFile);
+    })
+    .then(() => {
+        res.status(200).send('Article created successfully');
+        next();
+    })
+    .catch(err => {
+        next(err);
+    });
 };
 
 /**
@@ -66,7 +70,7 @@ const listArticle = (req: Request, res: Response) => {
  * @param {Response} res - Response object
  * @returns {void}
  */
-const getArticle = async (req: Request, res: Response) => {
+const getArticle = async (req: Request, res: Response, next: NextFunction) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
@@ -78,7 +82,7 @@ const getArticle = async (req: Request, res: Response) => {
         await articleGetService.deleteArticleFromDisk();
 
     } catch (err) {
-        handleRestError(err, res);
+        next(err);
     }
 };
 
@@ -107,7 +111,7 @@ const updateArticle = (req: Request, res: Response) => {
  * @returns {void}
  */
 
-const deleteArticle = async (req: Request, res: Response) => {
+const deleteArticle = async (req: Request, res: Response, next: NextFunction) => {
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
@@ -117,8 +121,8 @@ const deleteArticle = async (req: Request, res: Response) => {
         await articleDeleteService.delete();
         res.status(200).send('Article deleted successfully');
     } catch (err) {
-        handleRestError(err, res);
+        next(err);
     }
 };
 
-export {createArticle, listArticle, getArticle, updateArticle, deleteArticle};
+export { createArticle, listArticle, getArticle, updateArticle, deleteArticle };

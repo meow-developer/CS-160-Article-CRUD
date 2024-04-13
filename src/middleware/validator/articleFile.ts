@@ -1,24 +1,30 @@
-import { FileFilterCallback } from 'multer';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import TextTokenCounterService from '../../service/countTextToken.js';
 import { readPdfText } from 'pdf-text-reader';
 import { CustomRequest, OwnValidator } from './ownValidator.js';
-import ValidationRestError from './ValidationRestError.js';
-import formidable from 'formidable';
+import formidable, { EmitData } from 'formidable';
+import IncomingForm from 'formidable/Formidable.js';
+import fs from 'fs';
+
 
 export default class ArticleFileValidator extends OwnValidator{
     private ARTICLE_TOKEN_LIMIT = 3500;
-    private multipartForm: [formidable.Fields<string>, formidable.Files<string>] | undefined;
+    private multipartForm: [formidable.Fields<string>, formidable.Files<string>] | null = null;
     private FORM_FILE_FIELD = "pdf";
+    private TEMP_UPLOAD_DIR = "./temp_uploads";
+    private MAX_ACCEPT_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+    private form: IncomingForm | null = null;
+    private uploadPdfFile: formidable.File | null = null;
 
     constructor() {
         super();
+        this.initUploadDir();
+        this.initFormidable();
     }
 
-    private async getArticlePdfText(filePath: string): Promise<string> {
+    private async getArticlePdfText(): Promise<string> {
         try {
-            console.log(filePath)
-            return await readPdfText({ filePath: filePath });
+            return await readPdfText({ filePath: this.uploadPdfFile!.filepath });
         } catch (err) {
             console.error(err);
             throw new Error("Error reading pdf text");
@@ -39,13 +45,56 @@ export default class ArticleFileValidator extends OwnValidator{
         }
     }
 
-    private async loadMultipartForm(req: Request){
-        const form = new formidable.IncomingForm();
-        this.multipartForm =  await form.parse(req);
+    private initUploadDir(): void {
+        if (!fs.existsSync(this.TEMP_UPLOAD_DIR)) {
+            fs.mkdirSync(this.TEMP_UPLOAD_DIR);
+        }
     }
 
+    private async getFormEnd(): Promise<void> {
+        return new Promise((resolve) => {
+            this.form!.once("end", () => {
+                console.log("Form end");
+                resolve();
+            });
+        });
+    }
+    
+    private async deleteUploadFile(): Promise<void>{
+        // await this.getFormEnd();
+        fs.unlinkSync(this.uploadPdfFile!.filepath);
+    }
+
+    private initFormidable(): void {
+        this.form = formidable({
+            uploadDir: this.TEMP_UPLOAD_DIR,
+            maxFileSize: this.MAX_ACCEPT_FILE_SIZE, // 30MB
+            maxFiles: 1,
+            encoding: "utf-8"
+        });
+    }
+
+    private async loadMultipartForm(req: Request): Promise<void>{
+        return new Promise((resolve, reject) => {
+            this.form!.parse(req, (err, fields, files) => {
+                if (err) {
+                    reject(err);
+                }
+                this.multipartForm = [fields, files];
+                resolve();
+            })
+        })
+    }
+
+    private loadUploadFile(): void {
+        this.uploadPdfFile = this.multipartForm![1][this.FORM_FILE_FIELD]![0];
+    }
+        
+
     private async checkArticleFileExists (req: Request): Promise<boolean> {
-        if (!this.multipartForm![1][this.FORM_FILE_FIELD] && !this.multipartForm![1][this.FORM_FILE_FIELD]![0]) {
+        const formField = this.multipartForm![1][this.FORM_FILE_FIELD];
+
+        if (formField! && !formField![0]) {
             this.addFailResult(this.checkArticleFileExists.name, "No pdf file found in the request", 400);
             return false;
         }
@@ -55,7 +104,7 @@ export default class ArticleFileValidator extends OwnValidator{
     }
 
     private checkMimeType(req: Request): boolean {
-        if (this.multipartForm![1][this.FORM_FILE_FIELD]![0].mimetype !== "application/pdf") {
+        if (this.uploadPdfFile!.mimetype !== "application/pdf") {
             this.addFailResult(this.checkMimeType.name, "Invalid file type", 400);
             return false;
         }
@@ -63,18 +112,27 @@ export default class ArticleFileValidator extends OwnValidator{
         return true;
     }
 
-    public async validate(req: CustomRequest, res: Response): Promise<void> {
+    public async validate(req: CustomRequest, res: Response, next: NextFunction): Promise<void> {
+
         await this.loadMultipartForm(req);
 
         if (!this.checkArticleFileExists(req)) {
             return;
         }
 
+        this.loadUploadFile();
+
         if (!this.checkMimeType(req)) {
             return;
         }
-        const articleText = await this.getArticlePdfText(req.file!.path);
+
+        const articleText = await this.getArticlePdfText();
+
         this.checkFileToken(articleText);
+
+        next();
+
+        await this.deleteUploadFile();
     }
 }
 

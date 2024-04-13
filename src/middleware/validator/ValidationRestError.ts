@@ -15,12 +15,16 @@ export default class ValidationRestError extends RestError{
     }
 }
 
-export const throwOwnValidatorError = (req: Request) => {
+export const throwOwnValidatorError = async (req: Request): Promise<void> => {
     const customReq = req as CustomRequest;
     
-    const isErrorOccurred =  OwnValidationResult.isFail(customReq);
-    if (isErrorOccurred) {
-        const failResult = OwnValidationResult.getUniqueFailResult(customReq)!;
-        throw new ValidationRestError("Validation Error", failResult.failPublicStatusCode, failResult.failPublicMsg);
-    }
+    return new Promise((resolve, reject) => {
+        const isErrorOccurred =  OwnValidationResult.isFail(customReq);
+        if (isErrorOccurred) {
+            const failResult = OwnValidationResult.getUniqueFailResult(customReq)!;
+            reject(new ValidationRestError("Validation Error", failResult.failPublicStatusCode, failResult.failPublicMsg));
+        } else {
+            resolve();
+        }
+    });
 }
