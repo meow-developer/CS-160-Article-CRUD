@@ -67,11 +67,17 @@ export default class ArticleCreateService {
         )
     }
 
+    private simplifyFileName(fileName: string): string {
+        const concatFileName = fileName.replace(".pdf", "");
+        return concatFileName;
+    }
+
     public async save(file: formidable.File){
         const articleStorageUUID = await this.safeUUIDGeneration();
         try {
+            const articleFileName = this.simplifyFileName(file.originalFilename!);
 
-            await this.writeArticleToDb(file.originalFilename!, articleStorageUUID);
+            await this.writeArticleToDb(articleFileName, articleStorageUUID);
             await this.saveArticleToStorage(articleStorageUUID, file.filepath);
 
         } catch (err) {
