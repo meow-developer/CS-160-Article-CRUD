@@ -4,6 +4,7 @@ import { Article } from '../repo/article.js';
 import ArticleStorage from  '../repo/articleStorage.js';
 import { ServiceRestError } from './ServiceRestError.js';
 import formidable from 'formidable';
+import { readPdfText } from 'pdf-text-reader';
 
 export default class ArticleCreateService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
@@ -39,12 +40,14 @@ export default class ArticleCreateService {
 
     private async writeArticleToDb(
         articleFileName: string,
-        articleStorageUUID: UUID
+        articleStorageUUID: UUID,
+        articleTextSummary: string
     ){
         const article: Article = {
             Title: articleFileName,
             StorageArticleUUID: articleStorageUUID,
             Active: true,
+            PdfFileSummary: articleTextSummary
         }
         return await this.articleDb.insertArticle(article);
     }
@@ -67,6 +70,22 @@ export default class ArticleCreateService {
         )
     }
 
+    private async getPdfText(filePath: string){
+        try {
+            return await readPdfText({ filePath: filePath});
+        } catch (err) {
+            console.error(err);
+            throw new Error("Error reading pdf text");
+        }
+    }
+
+    private getPdfTextSummary(text: string): string {
+        //Get the first 50 words
+        const words = text.split(" ");
+        const summary = words.slice(0, 50).join(" ");
+        return summary;
+    }
+
     private simplifyFileName(fileName: string): string {
         const concatFileName = fileName.replace(".pdf", "");
         return concatFileName;
@@ -80,8 +99,10 @@ export default class ArticleCreateService {
         const articleStorageUUID = await this.safeUUIDGeneration();
         try {
             const articleFileName = this.simplifyFileName(file.originalFilename!);
+            const articleText = await this.getPdfText(file.filepath);
+            const articleTextSummary = this.getPdfTextSummary(articleText);
 
-            const articleId = await this.writeArticleToDb(articleFileName, articleStorageUUID);
+            const articleId = await this.writeArticleToDb(articleFileName, articleStorageUUID, articleTextSummary);
             await this.saveArticleToStorage(articleStorageUUID, file.filepath);
 
             return articleId;

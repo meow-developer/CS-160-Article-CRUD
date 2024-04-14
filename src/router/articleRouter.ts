@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as articleController from '../controller/articleController.js';
-import { articleIdValidator } from '../middleware/validator/article.js';
+import { articleIdValidator, articleQueryValidator } from '../middleware/validator/article.js';
 
 import ArticleFileValidator from '../middleware/validator/articleFile.js';
 import bodyParser from 'body-parser';
@@ -14,9 +14,9 @@ router.post('/',
 );
 
 
-router.get(`/`, articleController.listArticle);
+router.get(`/`,  articleController.listArticle);
 
-router.get('/:articleId', articleIdValidator, articleController.getArticle);
+router.get('/:articleId', articleQueryValidator, articleIdValidator, articleController.getArticle);
 
 router.put('/:articleId', articleIdValidator, new ArticleFileValidator()._, articleController.updateArticle);
 

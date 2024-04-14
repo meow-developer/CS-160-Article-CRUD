@@ -12,6 +12,7 @@ model Articles {
   Title              String        @db.VarChar(255)
   StorageArticleUUID String        @unique(map: "StorageArticleUUID") @db.VarChar(255)
   Active             Boolean       @default(true)
+  PdfFileSummary     String        @db.Text
   Diagram            Diagram?
   UserArticle        UserArticle[]
 }

@@ -59,7 +59,6 @@ export default class ArticleGetService {
                 let read = await reader.read();
                 while (!read.done) {
                     writer.write(read.value);
-                    console.log("Writing to file");
                     read = await reader.read(); // Continue reading from the stream
                 }
                 writer.end();

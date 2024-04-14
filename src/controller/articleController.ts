@@ -1,6 +1,7 @@
 import ArticleCreateService from '../service/articleCreate.js';
 import ArticleGetService from '../service/articleGet.js';
 import ArticleDeleteService from '../service/articleDelete.js';
+import ArticlesGetService from '../service/articlesGet.js';
 
 import { NextFunction, Request, Response } from 'express';
 
@@ -34,16 +35,23 @@ const createArticle = async (req: Request, res: Response, next: NextFunction) =>
  * @param {Response} res - Response object
  * @returns {void}
  */
-const listArticle = (req: Request, res: Response) => {
+const listArticle = async(req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
     // Default limit for the number of articles to fetch
     const DEFAULT_ARTICLE_COUNT_LIMIT = 10;
-    /** 
-    * Fetching the limit from the query parameters
-    * If the limit is not provided, the default limit will be used 
-    */
-    const articleCountLimit = query.limit || DEFAULT_ARTICLE_COUNT_LIMIT;
+    let articleCountLimit = DEFAULT_ARTICLE_COUNT_LIMIT;
+    try {
+        if (query.limit){
+            articleCountLimit = parseInt(query.limit as string);
+        }
+    
+        const articlesGetService = new ArticlesGetService();
 
+        const articles = await articlesGetService.get(articleCountLimit);
+        res.status(200).json(articles);
+    } catch (err) {
+        next(err);
+    }
 
 };
 
@@ -68,7 +76,6 @@ const getArticle = async (req: Request, res: Response, next: NextFunction) => {
         res.status(200).sendFile(articleFilePath);
 
         res.on("finish", async() => {
-            console.log("Deleting article from disk");
             await articleGetService.deleteArticleFromDisk();
         });
 

@@ -17,3 +17,7 @@ export const articleValidator = new ExpressValidator({
 export const articleIdValidator = articleValidator.param('articleId')
                                                     .isInt({min: 1})
                                                     .isArticleExist();
+
+export const articleQueryValidator = articleValidator.query('limit')
+                                                    .isInt({min: 1})
+                                                    .optional();

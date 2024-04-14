@@ -20,6 +20,7 @@ export default class ArticleDb {
             "data": {
                 "Title": article.Title,
                 "StorageArticleUUID": article.StorageArticleUUID,
+                "PdfFileSummary": article.PdfFileSummary,
                 "Active": article.Active
             }
         })
