@@ -23,7 +23,7 @@ export default class ArticleDeleteService {
     }
 
     private async deleteArticleInStorage() {
-        await this.articleStorage.deleteArticle(this.article?.StorageArticleUUID!);
+        await this.articleStorage.deleteArticle(this.article?.StorageArticleUUID! + ".pdf");
     }
     public async delete() {
         await this.loadArticleFromDb();

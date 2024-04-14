@@ -45,7 +45,7 @@ export default class ArticleGetService {
     private getTempStoragePath() {
         const currentFilePath = fileURLToPath(import.meta.url);
         const currentFolder = path.dirname(currentFilePath);
-        const tempStoragePath = path.resolve(currentFolder, '../../temp_file');
+        const tempStoragePath = path.resolve(currentFolder, '../../temp_files');
         return tempStoragePath;
     }
 

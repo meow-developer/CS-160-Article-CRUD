@@ -17,7 +17,7 @@ const createArticle = async (req: Request, res: Response, next: NextFunction) =>
         const articleId = await articleCreateService.save(articleFile);
         res.status(200).json({ articleId: articleId })
         
-        const articleRemove = req.ownValidation.extra.pdfRemove();
+        const articleRemove = req.ownValidation.extra.pdfRemove;
         await articleRemove();
         
     } catch (err) {
