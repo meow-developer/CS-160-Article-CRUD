@@ -46,7 +46,7 @@ export default class ArticleCreateService {
             StorageArticleUUID: articleStorageUUID,
             Active: true,
         }
-        await this.articleDb.insertArticle(article);
+        return await this.articleDb.insertArticle(article);
     }
 
     private async deleteArticleFromDb(articleStorageUUID: UUID){
@@ -72,14 +72,19 @@ export default class ArticleCreateService {
         return concatFileName;
     }
 
-    public async save(file: formidable.File){
+    /**
+     * 
+     * @returns {Promise<number>} - The ID of the article
+     */
+    public async save(file: formidable.File): Promise<number>{
         const articleStorageUUID = await this.safeUUIDGeneration();
         try {
             const articleFileName = this.simplifyFileName(file.originalFilename!);
 
-            await this.writeArticleToDb(articleFileName, articleStorageUUID);
+            const articleId = await this.writeArticleToDb(articleFileName, articleStorageUUID);
             await this.saveArticleToStorage(articleStorageUUID, file.filepath);
 
+            return articleId;
         } catch (err) {
             //Ensure atomicity
             //Undo all the changes made to the db and storage

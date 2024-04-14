@@ -14,10 +14,10 @@ const createArticle = async (req: Request, res: Response, next: NextFunction) =>
         const articleFile = req.ownValidation.validatedData["pdf"]; //The file is guaranteed to exist at this point
         const articleCreateService = new ArticleCreateService();
 
-        await articleCreateService.save(articleFile);
-        res.status(200).send('Article created successfully');
+        const articleId = await articleCreateService.save(articleFile);
+        res.status(200).json({ articleId: articleId })
         
-        const articleRemove = req.ownValidation.extra.get('pdfRemove');
+        const articleRemove = req.ownValidation.extra.pdfRemove();
         await articleRemove();
         
     } catch (err) {
@@ -66,7 +66,11 @@ const getArticle = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const articleFilePath = await articleGetService.get();
         res.status(200).sendFile(articleFilePath);
-        await articleGetService.deleteArticleFromDisk();
+
+        res.on("finish", async() => {
+            console.log("Deleting article from disk");
+            await articleGetService.deleteArticleFromDisk();
+        });
 
     } catch (err) {
         next(err);
