@@ -8,5 +8,5 @@ dist/
 .DS_Store
 
 .vscode/
-uploads/
+temp_files/
 temp_uploads/
