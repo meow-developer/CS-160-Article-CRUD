@@ -107,11 +107,11 @@ export default class ArticleFileValidator extends OwnValidator {
         this.addPassResult(this.checkMimeType.name);
     }
     private addPdfToRequest(req: Request): void {
-        req.ownValidation!.extra.set("pdf", this.uploadPdfFile);
+        req.ownValidation!.validatedData["pdf"] = this.uploadPdfFile;
     }
 
     private addPdfRemoveToRequest(req: Request): void {
-        req.ownValidation!.extra.set("pdfRemove", this.deleteUploadFile.bind(this));
+        req.ownValidation!.extra["pdfRemove"] = this.deleteUploadFile.bind(this);
     }
 
     public async validate(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -123,7 +123,7 @@ export default class ArticleFileValidator extends OwnValidator {
         this.checkMimeType(req)
         const articleText = await this.getArticlePdfText();
         this.checkFileToken(articleText);
-        
+
         this.addPdfToRequest(req);
         this.addPdfRemoveToRequest(req);
         next();

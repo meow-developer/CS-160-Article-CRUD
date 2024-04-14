@@ -30,7 +30,8 @@ declare global {
         interface Request {
             ownValidation: {
                 testResult: Test,
-                extra: Map<string, any>
+                validatedData: {[key: string]: any},
+                extra: {[key: string]: any}
             }
         }
     }
@@ -79,6 +80,7 @@ export abstract class OwnValidator {
         if (!req.ownValidation) {
             req.ownValidation = {
                 testResult: {},
+                validatedData: {},
                 extra: new Map()
             }
         }

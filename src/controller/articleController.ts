@@ -11,7 +11,7 @@ import { NextFunction, Request, Response } from 'express';
  */
 const createArticle = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const articleFile = req.ownValidation.extra.get('pdf'); //The file is guaranteed to exist at this point
+        const articleFile = req.ownValidation.validatedData["pdf"]; //The file is guaranteed to exist at this point
         const articleCreateService = new ArticleCreateService();
 
         await articleCreateService.save(articleFile);
