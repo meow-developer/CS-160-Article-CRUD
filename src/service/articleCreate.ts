@@ -81,8 +81,10 @@ export default class ArticleCreateService {
 
     private getPdfTextSummary(text: string): string {
         //Get the first 50 words
+        const WORD_COUNT = 50;
+
         const words = text.split(" ");
-        const summary = words.slice(0, 50).join(" ");
+        const summary = words.slice(0, WORD_COUNT).join(" ");
         return summary;
     }
 

@@ -59,9 +59,10 @@ export default class ArticleFileValidator extends OwnValidator {
         });
     }
 
-    private async deleteUploadFile(): Promise<void> {
-        // await this.getFormEnd();
-        fs.unlinkSync(this.uploadPdfFile!.filepath);
+    private async deleteFileWhenReqEnd(req: Request): Promise<void> {
+        req.on("end", () => {
+            fs.unlinkSync(this.uploadPdfFile!.filepath);
+        })
     }
 
     private initFormidable(): void {
@@ -110,10 +111,6 @@ export default class ArticleFileValidator extends OwnValidator {
         req.ownValidation!.validatedData["pdf"] = this.uploadPdfFile;
     }
 
-    private addPdfRemoveToRequest(req: Request): void {
-        req.ownValidation!.extra["pdfRemove"] = this.deleteUploadFile.bind(this);
-    }
-
     public async validate(req: Request, res: Response, next: NextFunction): Promise<void> {
         console.log("Validating article file");
         await this.loadMultipartForm(req);
@@ -125,7 +122,7 @@ export default class ArticleFileValidator extends OwnValidator {
         this.checkFileToken(articleText);
 
         this.addPdfToRequest(req);
-        this.addPdfRemoveToRequest(req);
+        this.deleteFileWhenReqEnd(req);
         next();
         // await this.deleteUploadFile();
         console.log("Article file validated")

@@ -1,4 +1,4 @@
-import { RestError } from "../restError.js";
+import { RestError } from "../type/restError.js";
 
 export class ServiceRestError extends RestError{
     public statusCode: number;

@@ -5,6 +5,7 @@ import { open, unlink } from 'fs/promises';
 import path from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
+import { Request } from 'express';
 
 export default class ArticleGetService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
@@ -13,9 +14,11 @@ export default class ArticleGetService {
     private articlePath: string | undefined;
     private articleId: number;
     private tempStoragePath: string;
+    private req: Request;
 
-    constructor(articleId: number){
+    constructor(articleId: number, req: Request){
         this.articleId = articleId;
+        this.req = req;
         this.tempStoragePath = this.getTempStoragePath();
         this.initTempStorage();
         
@@ -70,8 +73,10 @@ export default class ArticleGetService {
         });
     }
 
-    public async deleteArticleFromDisk() {
-        await unlink(this.articlePath!);
+    private deleteArticleFromDisk() {
+        this.req.on('close', async () => {
+            await unlink(this.articlePath!);
+        })
     }
 
 
@@ -81,6 +86,8 @@ export default class ArticleGetService {
 
         const articleStream = await this.getArticleStreamFromStorage();
         await this.saveArticleToDisk(articleStream)
+
+        this.deleteArticleFromDisk();
 
         return this.articlePath!;
     }
