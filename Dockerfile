@@ -13,5 +13,9 @@ COPY . .
 
 EXPOSE 8080
 
+CMD ["npx", "prisma", "db", "pull"]
+
+CMD ["npx", "prisma", "generate"]
+
 
 CMD ["npm", "start"]
