@@ -13,6 +13,7 @@ import { NextFunction, Request, Response } from 'express';
  */
 const createArticle = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const userId = req.userId;
         const articleFile = req.ownValidation.validatedData["pdf"]; //The file is guaranteed to exist at this point
         const articleCreateService = new ArticleCreateService();
 
@@ -37,6 +38,7 @@ const createArticle = async (req: Request, res: Response, next: NextFunction) =>
  * @returns {void}
  */
 const listArticle = async(req: Request, res: Response, next: NextFunction) => {
+    const userId = req.userId;
     const query = req.query;
     // Default limit for the number of articles to fetch
     const DEFAULT_ARTICLE_COUNT_LIMIT = 10;
@@ -70,6 +72,7 @@ const listArticle = async(req: Request, res: Response, next: NextFunction) => {
  * @returns {void}
  */
 const getArticle = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.userId;
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 
@@ -110,6 +113,7 @@ const updateArticle = (req: Request, res: Response) => {
  */
 
 const deleteArticle = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.userId;
     // Extracting the articleId from the request parameters
     const articleId = req.params.articleId;
 

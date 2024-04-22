@@ -4,9 +4,11 @@ import { articleIdValidator, articleQueryValidator } from '../middleware/validat
 
 import ArticleFileValidator from '../middleware/validator/articleFile.js';
 import { handleExpressValidation } from '../middleware/validator/expressValidatorHandler.js';
-
+import UserExtractor from '../middleware/userExtractor.js';
 
 const router = Router();
+
+router.use(new UserExtractor()._);
 
 router.post('/', 
     new ArticleFileValidator()._,
