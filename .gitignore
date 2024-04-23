@@ -10,6 +10,3 @@ dist/
 .vscode/
 temp_files/
 temp_uploads/
-
-
-src/repo/prisma/client
