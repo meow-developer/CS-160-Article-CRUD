@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "npx jest",
-    "start": "tsc --build && node ./dist/index.js"
+    "start": "tsc --build && node ./dist/index.js",
+    "prisma-generate": "npx prisma generate --schema ./src/repo/prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",
