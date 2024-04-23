@@ -1,4 +1,4 @@
-import type { Prisma } from './prisma/client/index.d.ts'
+import type { Prisma } from '../../prisma/client/index.js'
 import prismaClient from './db.js';
 
 export default class ArticleDb {

@@ -12,4 +12,4 @@ temp_files/
 temp_uploads/
 
 
-src/repo/prisma/client
+/prisma/client
