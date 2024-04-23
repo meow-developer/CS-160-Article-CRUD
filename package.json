@@ -51,6 +51,6 @@
     "npm": ">=10.0.0"
   },
   "prisma": {
-    "schema": "src/repo/prisma/schema.prisma"
+    "schema": "./src/repo/prisma/schema.prisma"
   }  
 }
