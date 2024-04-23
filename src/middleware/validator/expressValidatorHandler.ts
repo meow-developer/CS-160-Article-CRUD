@@ -8,7 +8,7 @@ export const handleExpressValidation = (req: Request, res: Response, next: NextF
 
     const response: RestResponse = {
         success: false,
-        errors: errors.array(),
+        errors: errors.array().map(err => err.msg),
         data: {}
     }
 
