@@ -49,8 +49,5 @@
   "engines": {
     "node": ">=20.11.0",
     "npm": ">=10.0.0"
-  },
-  "prisma": {
-    "schema": "./src/repo/prisma/schema.prisma"
-  }  
+  }
 }
