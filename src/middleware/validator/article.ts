@@ -16,8 +16,10 @@ export const articleValidator = new ExpressValidator({
 
 export const articleIdValidator = articleValidator.param('articleId')
                                                     .isInt({min: 1})
-                                                    .isArticleExist();
+                                                    .isArticleExist()
+                                                    .withMessage("Article ID is invalid");
 
 export const articleQueryValidator = articleValidator.query('limit')
                                                     .isInt({min: 1})
-                                                    .optional();
+                                                    .optional()
+                                                    .withMessage("Limit is invalid");

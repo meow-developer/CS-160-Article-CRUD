@@ -118,8 +118,7 @@ export abstract class OwnValidator {
     }
 
     private passValidationErrorResponse(next: NextFunction, testName: string, failResult: FailResult){
-        next(new ValidationRestError(`Running test: ${testName}.\n Result: \n ${failResult}`, 
-                                    failResult.failPublicStatusCode, failResult.failPublicMsg));
+        next(new ValidationRestError(`Running validation test: ${testName}.\n Validation error: \n ${failResult}`));
     }
 
     public async _(req: Request, res: Response, next: NextFunction){
