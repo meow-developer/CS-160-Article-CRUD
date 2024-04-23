@@ -1,4 +1,4 @@
-import { Prisma } from '../../node_modules/.prisma/client/index.js'
+import { Prisma } from './prisma/client/index.js'
 import prismaClient from './db.js';
 
 export default class ArticleDb {
