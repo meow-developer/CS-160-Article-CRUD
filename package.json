@@ -6,6 +6,7 @@
   "scripts": {
     "test": "npx jest",
     "start": "tsc --build && node ./dist/index.js",
+    "prisma-db-pull": "npx prisma db pull --schema ./src/repo/prisma/schema.prisma",
     "prisma-generate": "npx prisma generate --schema ./src/repo/prisma/schema.prisma"
   },
   "keywords": [],
