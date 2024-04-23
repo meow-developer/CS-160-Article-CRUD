@@ -11,7 +11,7 @@ app.use(morgan('combined'));
 
 const ARTICLE_API_ENDPOINT = 'article';
 const CORS_OPTIONS = {
-  origin: "*",
+  origin: [`http://localhost:${PORT}}`, "https://cs-160.pages.dev/"],
   methods: "GET,POST,PUT,DELETE"
 };
 
