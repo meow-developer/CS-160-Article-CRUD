@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 RUN npm install
-RUN npx prisma db pull
+RUN npm run prisma-db-pull
 RUN npm run prisma-generate
 
 COPY . .
