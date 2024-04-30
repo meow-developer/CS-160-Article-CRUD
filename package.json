@@ -45,6 +45,9 @@
     "typescript": "^5.4.3"
   },
   "type": "module",
+  "prisma": {
+    "schema": "src/repo/prisma/schema.prisma"
+  },
   "engines": {
     "node": ">=20.11.0",
     "npm": ">=10.0.0"
