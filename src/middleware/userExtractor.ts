@@ -9,30 +9,13 @@ declare global {
     }
 }
 
-class UserExtractorError extends Error {
-    constructor(message: string) {
-        super(message);
-    }
-}
-
 export default class UserExtractor {
-    private extractUserIdFromJWT = (JWT: string) => {
-        let decoded = jwt.decode(JWT);
-        decoded = decoded as { userId: string };
-
-        const userId = decoded!.userId;
-        return userId;
-    }
 
     public async _(req: Request, res: Response, next: NextFunction){
-        const JWT = req.headers.authorization;
+        const urlSplit = req.url.split('/');
+        const userId = urlSplit[1];
 
-        if (!JWT) {
-            next(new UserExtractorError('JWT not found'));
-            return;
-        }
-
-        const userId = this.extractUserIdFromJWT(JWT);
         req.userId = userId;
+        next();
     }
 }
