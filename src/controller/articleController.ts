@@ -17,7 +17,7 @@ const createArticle = async (req: Request, res: Response, next: NextFunction) =>
         const articleFile = req.ownValidation.validatedData["pdf"]; //The file is guaranteed to exist at this point
         const articleCreateService = new ArticleCreateService();
 
-        const articleId = await articleCreateService.save(articleFile);
+        const articleId = await articleCreateService.save(articleFile, userId);
 
         const response = RestResponseMaker.makeSuccessResponse({ articleId: articleId });
 
@@ -49,7 +49,7 @@ const listArticle = async(req: Request, res: Response, next: NextFunction) => {
     }
     try {
         const articlesGetService = new ArticlesGetService();
-        const articles = await articlesGetService.get(articleCountLimit);
+        const articles = await articlesGetService.get(userId, articleCountLimit);
 
         const response = RestResponseMaker.makeSuccessResponse({
             "articles": articles,
@@ -79,8 +79,14 @@ const getArticle = async (req: Request, res: Response, next: NextFunction) => {
     const articleGetService = new ArticleGetService(parseInt(articleId), req);
 
     try {
-        const articleFilePath = await articleGetService.get();
-        res.status(200).sendFile(articleFilePath);
+        const articleFilePath = await articleGetService.get(userId);
+        if (articleFilePath != null)
+            res.status(200).sendFile(articleFilePath);
+        else {
+            const response = RestResponseMaker.makeErrorResponse(["Article not found"]);
+            res.status(404).send(response);
+        }
+
 
     } catch (err) {
         next(err);
@@ -120,9 +126,14 @@ const deleteArticle = async (req: Request, res: Response, next: NextFunction) =>
     const articleDeleteService = new ArticleDeleteService(parseInt(articleId));
 
     try {
-        await articleDeleteService.delete();
-        const response = RestResponseMaker.makeSuccessResponse("Article deleted successfully");
-        res.status(200).send(response);
+        const deleteResult  = await articleDeleteService.delete(userId);
+        if (deleteResult === true){
+            const response = RestResponseMaker.makeSuccessResponse("Article deleted successfully");
+            res.status(200).send(response);
+        } else {
+            const response = RestResponseMaker.makeErrorResponse(["Article not found"]);
+            res.status(404).send(response);
+        }
         
     } catch (err) {
         next(err);

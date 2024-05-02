@@ -1,6 +1,7 @@
 import ArticleDb from '../repo/articleDb.js';
 import { Article } from '../repo/article.js';
 import ArticleStorage from '../repo/articleStorage.js';
+import UserArticleDb from '../repo/userArticleDb.js';
 import { open, unlink } from 'fs/promises';
 import path from 'path';
 import { existsSync, mkdirSync } from 'fs';
@@ -10,6 +11,7 @@ import { Request } from 'express';
 export default class ArticleGetService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
+    private userArticleDb: UserArticleDb = UserArticleDb.getInstance();
     private article: Article | undefined;
     private articlePath: string | undefined;
     private articleId: number;
@@ -22,6 +24,10 @@ export default class ArticleGetService {
         this.tempStoragePath = this.getTempStoragePath();
         this.initTempStorage();
         
+    }
+
+    private async getUserArticleFromDb(userId: string){
+        return await this.userArticleDb.getUserArticle(this.articleId, userId);
     }
 
     private async loadArticleFromDb() {
@@ -80,15 +86,17 @@ export default class ArticleGetService {
     }
 
 
-    public async get(): Promise<string>{
-        await this.loadArticleFromDb();
-        this.loadArticleStorageFilePath();
+    public async get(userId: string): Promise<string>{
+        const validUserId = await this.getUserArticleFromDb(userId);
+        if (validUserId) {
+            await this.loadArticleFromDb();
+            this.loadArticleStorageFilePath();
 
-        const articleStream = await this.getArticleStreamFromStorage();
-        await this.saveArticleToDisk(articleStream)
+            const articleStream = await this.getArticleStreamFromStorage();
+            await this.saveArticleToDisk(articleStream)
 
-        this.deleteArticleFromDisk();
-
+            this.deleteArticleFromDisk();
+        }
         return this.articlePath!;
     }
     
