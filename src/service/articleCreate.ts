@@ -1,6 +1,8 @@
 import crypto, { UUID } from 'crypto';
 import ArticleDb from '../repo/articleDb.js';
 import { Article } from '../repo/article.js';
+import UserArticleDb from '../repo/userArticleDb.js';
+import { UserArticle } from '../repo/userArticle.js';
 import ArticleStorage from  '../repo/articleStorage.js';
 import { ServiceRestError } from './ServiceRestError.js';
 import formidable from 'formidable';
@@ -8,6 +10,7 @@ import { readPdfText } from 'pdf-text-reader';
 
 export default class ArticleCreateService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
+    private userArticleDb: UserArticleDb = UserArticleDb.getInstance();
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
 
     private generateUUIDForArticleStore(): UUID {
@@ -50,6 +53,17 @@ export default class ArticleCreateService {
             PdfFileSummary: articleTextSummary
         }
         return await this.articleDb.insertArticle(article);
+    }
+
+    private async writeUserArticleToDb(
+        articleID: number,
+        userID: string
+    ) {
+        const userArticle: UserArticle = {
+            ArticleID: articleID,
+            UserUUID: userID
+        }
+        return await this.userArticleDb.insertUserArticle(userArticle);
     }
 
     private async deleteArticleFromDb(articleStorageUUID: UUID){
@@ -97,7 +111,7 @@ export default class ArticleCreateService {
      * 
      * @returns {Promise<number>} - The ID of the article
      */
-    public async save(file: formidable.File): Promise<number>{
+    public async save(file: formidable.File, userID: string): Promise<number>{
         const articleStorageUUID = await this.safeUUIDGeneration();
         try {
             const articleFileName = this.simplifyFileName(file.originalFilename!);
@@ -105,6 +119,7 @@ export default class ArticleCreateService {
             const articleTextSummary = this.getPdfTextSummary(articleText);
 
             const articleId = await this.writeArticleToDb(articleFileName, articleStorageUUID, articleTextSummary);
+            await this.writeUserArticleToDb(articleId, userID);
             await this.saveArticleToStorage(articleStorageUUID, file.filepath);
 
             return articleId;
