@@ -7,30 +7,25 @@ import { handleExpressValidation } from '../middleware/validator/expressValidato
 import UserExtractor from '../middleware/userExtractor.js';
 
 const router = Router();
+const ARTICLE_API_ENDPOINT = 'article';
 
 router.use(new UserExtractor()._);
 
-router.post('/', 
+router.post(`/:accountId/${ARTICLE_API_ENDPOINT}`, 
     new ArticleFileValidator()._,
     articleController.createArticle
 );
 
 
-router.get(`/`, articleController.listArticle);
+router.get(`/:accountId/${ARTICLE_API_ENDPOINT}`, articleController.listArticle);
 
-router.get('/:articleId', 
+router.get(`/:accountId/${ARTICLE_API_ENDPOINT}/:articleId`, 
             articleQueryValidator, 
             articleIdValidator,
             handleExpressValidation,  
             articleController.getArticle);
 
-router.put('/:articleId', 
-            articleIdValidator,
-            handleExpressValidation,
-            new ArticleFileValidator()._, 
-            articleController.updateArticle);
-
-router.delete('/:articleId', 
+router.delete(`/:accountId/${ARTICLE_API_ENDPOINT}/:articleId`, 
                 articleIdValidator, 
                 handleExpressValidation,
                 articleController.deleteArticle);

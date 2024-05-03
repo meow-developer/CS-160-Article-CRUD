@@ -8,8 +8,7 @@ const app = express();
 const PORT = 8080;
 
 app.use(morgan('combined'));
-
-const ARTICLE_API_ENDPOINT = 'article';
+const ACCOUNT_ARTICLE_API_ENDPOINT = 'account';
 const CORS_OPTIONS = {
   origin: [`http://localhost:${PORT}}`, "https://cs-160.pages.dev/"],
   methods: "GET,POST,PUT,DELETE"
@@ -18,7 +17,7 @@ const CORS_OPTIONS = {
 app.use(cors(CORS_OPTIONS));
 
 
-app.use(`/${ARTICLE_API_ENDPOINT}`, articleRouter);
+app.use(`/${ACCOUNT_ARTICLE_API_ENDPOINT}`, articleRouter);
 
 app.use(errorHandlingMiddleware);
 
