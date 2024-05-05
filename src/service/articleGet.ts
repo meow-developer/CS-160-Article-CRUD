@@ -4,100 +4,55 @@ import ArticleStorage from '../repo/articleStorage.js';
 import UserArticleDb from '../repo/userArticleDb.js';
 import { open, unlink } from 'fs/promises';
 import path from 'path';
-import { existsSync, mkdirSync } from 'fs';
-import { fileURLToPath } from 'url';
+import DiskStorage from '../repo/diskStorage.js';
 import { Request } from 'express';
 
 export default class ArticleGetService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
     private userArticleDb: UserArticleDb = UserArticleDb.getInstance();
-    private article: Article | undefined;
-    private articlePath: string | undefined;
+    private diskStorage: DiskStorage = DiskStorage.getInstance();
+
     private articleId: number;
-    private tempStoragePath: string;
     private req: Request;
 
     constructor(articleId: number, req: Request){
         this.articleId = articleId;
         this.req = req;
-        this.tempStoragePath = this.getTempStoragePath();
-        this.initTempStorage();
         
     }
 
-    private async getUserArticleFromDb(userId: string){
-        return await this.userArticleDb.getUserArticle(this.articleId, userId);
-    }
-
-    private async loadArticleFromDb() {
+    private async getArticleFromDb() {
         const article = await this.articleDb.getArticleById(this.articleId);
 
-        this.article = article!;
+        return article!;
     }
 
-    private async loadArticleStorageFilePath() {
-        const articleOriginalFileName = this.article?.Title;
-        this.articlePath = path.join(this.tempStoragePath, articleOriginalFileName! + ".pdf");
+
+    private async getArticleStreamFromStorage(storageArticleUUID: string): Promise<Uint8Array> {
+        return await this.articleStorage.getArticle(storageArticleUUID + ".pdf");
     }
 
-    private async getArticleStreamFromStorage(): Promise<ReadableStream> {
-        return await this.articleStorage.getArticle(this.article?.StorageArticleUUID! + ".pdf");
+    private async saveArticleToDisk(articleStorageUUID: string, articleUnitArray: Uint8Array): Promise<string> {
+        const filePath = await this.diskStorage.saveByteArrayToDisk(articleStorageUUID, articleUnitArray);
+        return filePath;
     }
 
-    private initTempStorage() {
-        if (!existsSync(this.tempStoragePath)) {
-            mkdirSync(this.tempStoragePath);
-        }
-    }
-
-    private getTempStoragePath() {
-        const currentFilePath = fileURLToPath(import.meta.url);
-        const currentFolder = path.dirname(currentFilePath);
-        const tempStoragePath = path.resolve(currentFolder, '../../temp_files');
-        return tempStoragePath;
-    }
-
-    private async saveArticleToDisk(articleStream: ReadableStream): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const reader = articleStream.getReader();
-                const file = await open(this.articlePath!, 'w');
-                const writer = file.createWriteStream();
-    
-                let read = await reader.read();
-                while (!read.done) {
-                    writer.write(read.value);
-                    read = await reader.read(); // Continue reading from the stream
-                }
-                writer.end();
-                resolve();
-            } catch (err) {
-                reject(err);
-            }
-
-        });
-    }
-
-    private deleteArticleFromDisk() {
+    private deleteArticleFromDisk(filePath: string) {
         this.req.on('close', async () => {
-            await unlink(this.articlePath!);
+            this.diskStorage.deleteFileByFilePath(filePath);
         })
     }
 
 
     public async get(userId: string): Promise<string>{
-        const validUserId = await this.getUserArticleFromDb(userId);
-        if (validUserId) {
-            await this.loadArticleFromDb();
-            this.loadArticleStorageFilePath();
+        const article = await this.getArticleFromDb();
 
-            const articleStream = await this.getArticleStreamFromStorage();
-            await this.saveArticleToDisk(articleStream)
+        const articleUnitArray = await this.getArticleStreamFromStorage(article.StorageArticleUUID);
+        const filePath = await this.saveArticleToDisk(article?.StorageArticleUUID, articleUnitArray)
 
-            this.deleteArticleFromDisk();
-        }
-        return this.articlePath!;
+        this.deleteArticleFromDisk(filePath);
+        return filePath;
+        
     }
-    
 }

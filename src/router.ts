@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import * as articleController from '../controller/articleController.js';
-import { articleIdValidator, articleQueryValidator } from '../middleware/validator/article.js';
+import * as articleController from './controller/articleController.js';
+import { articleIdValidator, articleQueryValidator } from './middleware/validator/article.js';
 
-import ArticleFileValidator from '../middleware/validator/articleFile.js';
-import { handleExpressValidation } from '../middleware/validator/expressValidatorHandler.js';
-import UserExtractor from '../middleware/userExtractor.js';
+import ArticleFileValidator from './middleware/validator/articleFile.js';
+import { handleExpressValidation } from './middleware/validator/expressValidatorHandler.js';
+import UserExtractor from './middleware/userExtractor.js';
+import CheckUserArticleAccess from './middleware/userArticleAccess.js';
 
 const router = Router();
 const ARTICLE_API_ENDPOINT = 'article';
@@ -22,11 +23,13 @@ router.get(`/:accountId/${ARTICLE_API_ENDPOINT}`, articleController.listArticle)
 router.get(`/:accountId/${ARTICLE_API_ENDPOINT}/:articleId`, 
             articleQueryValidator, 
             articleIdValidator,
+            new CheckUserArticleAccess().checkAccessMiddleware,
             handleExpressValidation,  
             articleController.getArticle);
 
 router.delete(`/:accountId/${ARTICLE_API_ENDPOINT}/:articleId`, 
-                articleIdValidator, 
+                articleIdValidator,
+                new CheckUserArticleAccess().checkAccessMiddleware,
                 handleExpressValidation,
                 articleController.deleteArticle);
 
