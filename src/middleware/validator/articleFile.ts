@@ -60,7 +60,7 @@ export default class ArticleFileValidator extends OwnValidator {
     }
 
     private async deleteFileWhenReqEnd(req: Request): Promise<void> {
-        req.on("end", () => {
+        req.on("close", () => {
             fs.unlinkSync(this.uploadPdfFile!.filepath);
         })
     }

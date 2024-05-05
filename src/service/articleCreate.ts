@@ -7,11 +7,13 @@ import ArticleStorage from  '../repo/articleStorage.js';
 import { ServiceRestError } from './ServiceRestError.js';
 import formidable from 'formidable';
 import { readPdfText } from 'pdf-text-reader';
+import DiskStorage from '../repo/diskStorage.js';
 
 export default class ArticleCreateService {
     private articleDb: ArticleDb = ArticleDb.getInstance();
     private userArticleDb: UserArticleDb = UserArticleDb.getInstance();
     private articleStorage: ArticleStorage = ArticleStorage.getInstance();
+    private diskStorage: DiskStorage = DiskStorage.getInstance();
 
     private generateUUIDForArticleStore(): UUID {
         return crypto.randomUUID();

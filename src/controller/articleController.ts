@@ -80,13 +80,8 @@ const getArticle = async (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const articleFilePath = await articleGetService.get(userId);
-        if (articleFilePath != null)
-            res.status(200).sendFile(articleFilePath);
-        else {
-            const response = RestResponseMaker.makeErrorResponse(["Article not found"]);
-            res.status(404).send(response);
-        }
-
+        res.status(200).header("Content-Type", "application/pdf")
+        .sendFile(articleFilePath);
 
     } catch (err) {
         next(err);

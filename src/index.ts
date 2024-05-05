@@ -1,5 +1,5 @@
 import express from 'express';
-import articleRouter from './router/articleRouter.js';
+import articleRouter from './router.js';
 import cors from 'cors';
 import { errorHandlingMiddleware } from './middleware/restErrorHandler.js';
 import morgan from 'morgan';
