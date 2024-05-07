@@ -18,14 +18,19 @@ router.post(`/:accountId/${ARTICLE_API_ENDPOINT}`,
 );
 
 
-router.get(`/:accountId/${ARTICLE_API_ENDPOINT}`, articleController.listArticle);
+router.get(`/:accountId/${ARTICLE_API_ENDPOINT}`, articleQueryValidator, articleController.listArticle);
 
-router.get(`/:accountId/${ARTICLE_API_ENDPOINT}/:articleId`, 
-            articleQueryValidator, 
+router.get(`/:accountId/${ARTICLE_API_ENDPOINT}/:articleId`,
             articleIdValidator,
             new CheckUserArticleAccess().checkAccessMiddleware,
             handleExpressValidation,  
             articleController.getArticle);
+
+router.get('/:accountId/article/:articleId/metadata', 
+                                articleIdValidator, 
+                                new CheckUserArticleAccess().checkAccessMiddleware,
+                                handleExpressValidation,
+                                articleController.getArticleMetadata);
 
 router.delete(`/:accountId/${ARTICLE_API_ENDPOINT}/:articleId`, 
                 articleIdValidator,
