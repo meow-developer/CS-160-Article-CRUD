@@ -7,9 +7,9 @@ const app = express();
 const PORT = 8080;
 
 app.use(morgan('combined'));
-const ACCOUNT_ARTICLE_API_ENDPOINT = 'account';
+const ACCOUNT_API_ENDPOINT = 'account';
 
-app.use(`/${ACCOUNT_ARTICLE_API_ENDPOINT}`, articleRouter);
+app.use(`/${ACCOUNT_API_ENDPOINT}`, articleRouter);
 
 app.use(errorHandlingMiddleware);
 
