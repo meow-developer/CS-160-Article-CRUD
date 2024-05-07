@@ -1,6 +1,5 @@
 import express from 'express';
 import articleRouter from './router.js';
-import cors from 'cors';
 import { errorHandlingMiddleware } from './middleware/restErrorHandler.js';
 import morgan from 'morgan';
 
@@ -9,13 +8,6 @@ const PORT = 8080;
 
 app.use(morgan('combined'));
 const ACCOUNT_ARTICLE_API_ENDPOINT = 'account';
-const CORS_OPTIONS = {
-  origin: [`http://localhost:${PORT}}`, "https://cs-160.pages.dev/"],
-  methods: "GET,POST,PUT,DELETE"
-};
-
-app.use(cors(CORS_OPTIONS));
-
 
 app.use(`/${ACCOUNT_ARTICLE_API_ENDPOINT}`, articleRouter);
 

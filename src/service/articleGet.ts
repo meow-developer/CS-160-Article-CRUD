@@ -1,9 +1,6 @@
 import ArticleDb from '../repo/articleDb.js';
-import { Article } from '../repo/article.js';
 import ArticleStorage from '../repo/articleStorage.js';
 import UserArticleDb from '../repo/userArticleDb.js';
-import { open, unlink } from 'fs/promises';
-import path from 'path';
 import DiskStorage from '../repo/diskStorage.js';
 import { Request } from 'express';
 

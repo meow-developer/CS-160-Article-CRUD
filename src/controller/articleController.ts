@@ -1,5 +1,6 @@
 import ArticleCreateService from '../service/articleCreate.js';
 import ArticleGetService from '../service/articleGet.js';
+import ArticleMetadataGetService from '../service/articleMetadataGet.js';
 import ArticleDeleteService from '../service/articleDelete.js';
 import ArticlesGetService from '../service/articlesGet.js';
 import RestResponseMaker from './tools/responseMaker.js';
@@ -88,6 +89,21 @@ const getArticle = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
+const getArticleMetadata = async (req: Request, res: Response, next: NextFunction) => {
+    // Extracting the articleId from the request parameters
+    const articleId = req.params.articleId;
+
+    const articleMetadataGetService = new ArticleMetadataGetService(parseInt(articleId));
+
+    try {
+        const articleMeta = await articleMetadataGetService.get();
+        const response = RestResponseMaker.makeSuccessResponse(articleMeta);
+        res.status(200).json(response);
+    } catch (err) {
+        next(err);
+    }
+}
+
 /**
  * Updating an article
  * HTTP Method: PUT
@@ -135,4 +151,4 @@ const deleteArticle = async (req: Request, res: Response, next: NextFunction) =>
     }
 };
 
-export { createArticle, listArticle, getArticle, updateArticle, deleteArticle };
+export { createArticle, listArticle, getArticle, getArticleMetadata, updateArticle, deleteArticle };
