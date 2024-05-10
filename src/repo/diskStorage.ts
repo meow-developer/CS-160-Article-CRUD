@@ -56,17 +56,27 @@ export default class DiskStorage {
     }
 
     public async saveStringToDisk(fileName: string, content: string) {
-        const filePath = this.getFilePath(fileName);
-        const write = await open(filePath, 'w');
-        await write.write(content);
-        return filePath;
+        let write;
+        try {
+            const filePath = this.getFilePath(fileName);
+            write = await open(filePath, 'w');
+            await write.write(content);
+            return filePath;
+        } finally {
+            write?.close();
+        }
     }
 
     public async saveByteArrayToDisk(fileName: string, byteArray: Uint8Array) {
-        const filePath = this.getFilePath(fileName);
-        const write = await open(filePath, 'w');
-        await write.write(byteArray);
-        return filePath;
+        let write;
+        try {
+            const filePath = this.getFilePath(fileName);
+            write = await open(filePath, 'w');
+            await write.write(byteArray);
+            return filePath;
+        } finally {
+            write?.close();
+        }
     }
 
     public async deleteFileByFileName(fileName: string) {
